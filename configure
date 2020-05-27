@@ -625,6 +625,10 @@ gl_use_threads_default=
 ac_func_list=
 ac_subst_vars='LTLIBOBJS
 LIBOBJS
+HAVE_OPENSSL_SHA_CAN_COMPILE_AND_LINK
+HAVE_OPENSSL_SHA_LIB
+HAVE_OPENSSL_SHA_H
+badblocks_LDFLAGS
 systemd_system_unit_dir
 have_systemd
 systemd_LIBS
@@ -14643,6 +14647,8 @@ fi
 
 
 
+
+
 # Check whether --with-OpenSSL was given.
 if test "${with_OpenSSL+set}" = set; then :
   withval=$with_OpenSSL; $as_echo "#define with_OpenSSL 1" >>confdefs.h
@@ -14653,7 +14659,7 @@ fi
 
 # Check whether --enable-crypto-badblocks-readWrite was given.
 if test "${enable_crypto_badblocks_readWrite+set}" = set; then :
-  enableval=$enable_crypto_badblocks_readWrite; $as_echo "#define crypto_badblocks_readWrite 1" >>confdefs.h
+  enableval=$enable_crypto_badblocks_readWrite; $as_echo "#define badblocks_crypto_readWrite 1" >>confdefs.h
 
 
 fi
@@ -14663,8 +14669,8 @@ fi
 $as_echo "$as_me: About to check whether or not the C compiler can find the OpenSSL SHA header..." >&6;}
 ac_fn_c_check_header_mongrel "$LINENO" "openssl/sha.h" "ac_cv_header_openssl_sha_h" "$ac_includes_default"
 if test "x$ac_cv_header_openssl_sha_h" = xyes; then :
-
-$as_echo "#define HAVE_OPENSSL_SHA_H 1" >>confdefs.h
+  HAVE_OPENSSL_SHA_H=1
+                $as_echo "#define HAVE_OPENSSL_SHA_H 1" >>confdefs.h
 
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: OpenSSL SHAsums library header (i.e. include file) not found." >&5
@@ -14715,6 +14721,7 @@ $as_echo "$ac_cv_lib_ssl_SHA512" >&6; }
 if test "x$ac_cv_lib_ssl_SHA512" = xyes; then :
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: SHA512 library routine found." >&5
 $as_echo "SHA512 library routine found." >&6; }
+             HAVE_OPENSSL_SHA_LIB=1
              $as_echo "#define HAVE_OPENSSL_SHA_LIB 1" >>confdefs.h
 
 else
@@ -14725,27 +14732,78 @@ fi
 
 
 ### --- with thanks to "brianegge" at <https://stackoverflow.com/questions/918676/generate-sha-hash-in-c-using-openssl-library#919375> --- ###
-# AC_LINK_IFELSE(
-#                [
-#                 AC_LANG_PROGRAM(
-#                                 [[
-#                                   #include <openssl/sha.h>
-#                                   #include <stdio.h>
-#                                   #include <string.h>
-#                                 ]],
-#                                 [[
-#                                   unsigned char  input_buffer[] = "this is a test of the emergency broadcast system.";
-#                                   unsigned char output_buffer[99]; /* should only need 64, but allowing for overflow */
-#                                   SHA512(input_buffer, strlen(input_buffer), output_buffer);
-#                                 ]]
-#                                )
-#                ],
-#                [AC_MSG_RESULT([yes])]
-#                [AC_DEFINE([HAVE_OPENSSL_SHA_LIB], 1, [Define to 1 if you have an OpenSSL library that at least supports the "SHA512" routine.])]
-#                [LIBS="$LIBS -lssl"],
-#                [AC_MSG_RESULT([no])]
-#                [AC_MSG_ERROR([OpenSSL SHAsums library not found or does not support the "SHA512" routine.])]
-#               )
+{ $as_echo "$as_me:${as_lineno-$LINENO}: About to check whether or not we can compile _and_ link a program that depends on the SHA512 library routine that is expected to be provided by OpenSSL..." >&5
+$as_echo "$as_me: About to check whether or not we can compile _and_ link a program that depends on the SHA512 library routine that is expected to be provided by OpenSSL..." >&6;}
+
+LIBS_BACKUP="$LIBS"
+LIBS="$LIBS -lssl"
+
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+
+                                  #include <openssl/sha.h>
+                                  #include <stdio.h>
+                                  #include <string.h>
+
+int
+main ()
+{
+
+                                  unsigned char  input_buffer[] = "this is a test of the emergency broadcast system.";
+                                  unsigned char output_buffer[99]; /* should only need 64, but allowing for overflow */
+                                  SHA512(input_buffer, strlen(input_buffer), output_buffer);
+
+
+  ;
+  return 0;
+}
+
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+               $as_echo "#define HAVE_OPENSSL_SHA_CAN_COMPILE_AND_LINK 1" >>confdefs.h
+
+               HAVE_OPENSSL_SHA_CAN_COMPILE_AND_LINK=1
+else
+                 { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+               { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: OpenSSL SHAsums library not found or does not support the \"SHA512\" routine." >&5
+$as_echo "$as_me: WARNING: OpenSSL SHAsums library not found or does not support the \"SHA512\" routine." >&2;}
+
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+
+LIBS="$LIBS_BACKUP"
+
+echo "TESTING: HAVE_OPENSSL_SHA_H = $HAVE_OPENSSL_SHA_H"
+echo "TESTING: HAVE_OPENSSL_SHA_LIB = $HAVE_OPENSSL_SHA_LIB"
+echo "TESTING: HAVE_OPENSSL_SHA_CAN_COMPILE_AND_LINK = $HAVE_OPENSSL_SHA_CAN_COMPILE_AND_LINK"
+
+if test _$HAVE_OPENSSL_SHA_H = _1 -a _$HAVE_OPENSSL_SHA_LIB = _1 -a _$HAVE_OPENSSL_SHA_CAN_COMPILE_AND_LINK = _1; then
+  echo "Detected that all the requirements for OpenSSL-based crypto-badblocks have been met..."
+  if   _$with_OpenSSL != _1 -a _$badblocks_crypto_readWrite != _1; then
+    echo "... but both ''with_OpenSSL'' & ''badblocks_crypto_readWrite'' seem  to be disabled."
+  elif _$with_OpenSSL != _1                                      ; then
+    echo "... but"    "''with_OpenSSL''"                                "seems to be disabled."
+  elif                         _$badblocks_crypto_readWrite != _1; then
+    echo "... but"                       "''badblocks_crypto_readWrite'' seems to be disabled."
+  else # pay dirt!  :-)
+    badblocks_LDFLAGS=$LDFLAGS -lssl
+
+
+    HAVE_OPENSSL_SHA_H=1
+
+    HAVE_OPENSSL_SHA_LIB=1
+
+    HAVE_OPENSSL_SHA_CAN_COMPILE_AND_LINK=1
+
+  fi
+fi
+
+
 
 
 

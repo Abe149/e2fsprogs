@@ -1756,6 +1756,8 @@ AC_SUBST(systemd_system_unit_dir)
 
 
 
+
+
 dnl # --- Abe was here --- #
 
 dnl # maybe TO DO in the future: make this feature also buildable with other libraries besides OpenSSL
@@ -1769,14 +1771,15 @@ AC_ARG_WITH(
 AC_ARG_ENABLE(
               [crypto-badblocks-readWrite],
               [  --enable-crypto-badblocks-readWrite : enable the "badblocks" feature that provides a secure and trustworthy destructive read-write test in only two complete passes.],
-              AC_DEFINE([crypto_badblocks_readWrite], 1)
+              AC_DEFINE([badblocks_crypto_readWrite], 1)
              )
 
 dnl # The next line: _intentionally_ not using "AC_MSG_CHECKING" [for reasons of "cleanliness" of output]
 AC_MSG_NOTICE([About to check whether or not the C compiler can find the OpenSSL SHA header...])
 AC_CHECK_HEADER(
                 [openssl/sha.h],
-                [AC_DEFINE([HAVE_OPENSSL_SHA_H], 1, [Define to 1 if you have <openssl/sha.h>.])],
+                [HAVE_OPENSSL_SHA_H=1]
+                [AC_DEFINE([HAVE_OPENSSL_SHA_H], 1)],
                 [AC_MSG_WARN([OpenSSL SHAsums library header (i.e. include file) not found.])]
                )
 
@@ -1786,32 +1789,67 @@ AC_CHECK_LIB(
              [ssl],
              [SHA512],
              [AC_MSG_RESULT([SHA512 library routine found.])]
+             [HAVE_OPENSSL_SHA_LIB=1]
              [AC_DEFINE([HAVE_OPENSSL_SHA_LIB], 1)],
              [AC_MSG_WARN([SHA512 library routine not found.])]
             )
 
 ### --- with thanks to "brianegge" at <https://stackoverflow.com/questions/918676/generate-sha-hash-in-c-using-openssl-library#919375> --- ###
-# AC_LINK_IFELSE(
-#                [
-#                 AC_LANG_PROGRAM(
-#                                 [[
-#                                   #include <openssl/sha.h>
-#                                   #include <stdio.h>
-#                                   #include <string.h>
-#                                 ]],
-#                                 [[
-#                                   unsigned char  input_buffer[] = "this is a test of the emergency broadcast system.";
-#                                   unsigned char output_buffer[99]; /* should only need 64, but allowing for overflow */
-#                                   SHA512(input_buffer, strlen(input_buffer), output_buffer);
-#                                 ]]
-#                                )
-#                ],
-#                [AC_MSG_RESULT([yes])]
-#                [AC_DEFINE([HAVE_OPENSSL_SHA_LIB], 1, [Define to 1 if you have an OpenSSL library that at least supports the "SHA512" routine.])]
-#                [LIBS="$LIBS -lssl"],
-#                [AC_MSG_RESULT([no])]
-#                [AC_MSG_ERROR([OpenSSL SHAsums library not found or does not support the "SHA512" routine.])]
-#               )
+AC_MSG_NOTICE([About to check whether or not we can compile _and_ link a program that depends on the SHA512 library routine that is expected to be provided by OpenSSL...])
+dnl # LIBS="$LIBS -lssl" LDFLAGS="$LDFLAGS -lssl" AC_LINK_IFELSE( # didn`t work
+
+LIBS_BACKUP="$LIBS"
+LIBS="$LIBS -lssl"
+
+AC_LINK_IFELSE(
+               [
+                AC_LANG_PROGRAM(
+                                [[
+                                  #include <openssl/sha.h>
+                                  #include <stdio.h>
+                                  #include <string.h>
+                                ]],
+                                [[
+                                  unsigned char  input_buffer[] = "this is a test of the emergency broadcast system.";
+                                  unsigned char output_buffer[99]; /* should only need 64, but allowing for overflow */
+                                  SHA512(input_buffer, strlen(input_buffer), output_buffer);
+                                ]]
+                               )
+               ],
+               [AC_MSG_RESULT([yes])]
+               [AC_DEFINE([HAVE_OPENSSL_SHA_CAN_COMPILE_AND_LINK], 1)]
+               [HAVE_OPENSSL_SHA_CAN_COMPILE_AND_LINK=1],
+dnl #          [LIBS="$LIBS -lssl"], # WIP WIP WIP
+               [AC_MSG_RESULT([no])]
+               [AC_MSG_WARN([OpenSSL SHAsums library not found or does not support the "SHA512" routine.])]
+              )
+
+LIBS="$LIBS_BACKUP"
+
+echo "TESTING: HAVE_OPENSSL_SHA_H = $HAVE_OPENSSL_SHA_H"
+echo "TESTING: HAVE_OPENSSL_SHA_LIB = $HAVE_OPENSSL_SHA_LIB"
+echo "TESTING: HAVE_OPENSSL_SHA_CAN_COMPILE_AND_LINK = $HAVE_OPENSSL_SHA_CAN_COMPILE_AND_LINK"
+
+if test _$HAVE_OPENSSL_SHA_H = _1 -a _$HAVE_OPENSSL_SHA_LIB = _1 -a _$HAVE_OPENSSL_SHA_CAN_COMPILE_AND_LINK = _1; then
+  echo "Detected that all the requirements for OpenSSL-based crypto-badblocks have been met..."
+  if   _$with_OpenSSL != _1 -a _$badblocks_crypto_readWrite != _1; then
+    echo "... but both ''with_OpenSSL'' & ''badblocks_crypto_readWrite'' seem  to be disabled."
+  elif _$with_OpenSSL != _1                                      ; then
+    echo "... but"    "''with_OpenSSL''"                                "seems to be disabled."
+  elif                         _$badblocks_crypto_readWrite != _1; then
+    echo "... but"                       "''badblocks_crypto_readWrite'' seems to be disabled."
+  else # pay dirt!  :-)
+dnl #    badblocks_LDFLAGS="$LDFLAGS -lssl" # WIP
+    AC_SUBST(badblocks_LDFLAGS, [$LDFLAGS -lssl])
+
+    AC_SUBST(HAVE_OPENSSL_SHA_H, 1)
+    AC_SUBST(HAVE_OPENSSL_SHA_LIB, 1)
+    AC_SUBST(HAVE_OPENSSL_SHA_CAN_COMPILE_AND_LINK, 1)
+  fi
+fi
+
+
+dnl # --- ^^^ --- Abe was here --- ^^^ --- #
 
 
 
