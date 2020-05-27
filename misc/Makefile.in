@@ -355,7 +355,7 @@ fsck.profiled: $(FSCK_OBJS) $(PROFILED_DEPLIBBLKID)
 
 badblocks: $(BADBLOCKS_OBJS) $(DEPLIBS)
 	$(E) "	LD $@"
-	$(Q) $(CC) $(ALL_LDFLAGS) -o badblocks $(BADBLOCKS_OBJS) $(LIBS) \
+	$(Q) $(CC) $(ALL_LDFLAGS) @badblocks_LDFLAGS@ -o badblocks $(BADBLOCKS_OBJS) $(LIBS) \
 		$(LIBINTL) $(SYSLIBS)
 
 badblocks.profiled: $(BADBLOCKS_OBJS) $(PROFILED_DEPLIBS)
