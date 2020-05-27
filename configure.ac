@@ -1755,20 +1755,33 @@ AC_SUBST(have_systemd)
 AC_SUBST(systemd_system_unit_dir)
 
 
+
 # --- Abe was here --- #
 
 # maybe TO DO in the future: make this feature also buildable with other libraries besides OpenSSL
 
-AC_MSG_CHECKING([whether or not the C compiler can find the OpenSSL SHA header])
+AC_ARG_WITH(
+            [OpenSSL],
+            AC_HELP_STRING([--with-OpenSSL : try to compile and link with the OpenSSL library for its cryptographic hashing functions, to enable the "badblocks" feature that provides a secure and trustworthy destructive read-write test in only two complete passes.]),
+            AC_DEFINE([with_OpenSSL], 1)
+           )
+
+AC_ARG_ENABLE(
+              [crypto-badblocks-readWrite],
+              [  --enable-crypto-badblocks-readWrite : enable the "badblocks" feature that provides a secure and trustworthy destructive read-write test in only two complete passes.],
+              AC_DEFINE([crypto_badblocks_readWrite], 1)
+             )
+
+# The next line: _intentionally_ not using "AC_MSG_CHECKING"
+AC_MSG_NOTICE([About to check whether or not the C compiler can find the OpenSSL SHA header...])
 AC_CHECK_HEADER(
                 [openssl/sha.h],
                 [AC_DEFINE([HAVE_OPENSSL_SHA_H], 1, [Define to 1 if you have <openssl/sha.h>.])],
-                [AC_MSG_ERROR([OpenSSL SHAsums library header (i.e. include file) not found.])]
+                [AC_MSG_WARN([OpenSSL SHAsums library header (i.e. include file) not found.])]
                )
 
-
-AC_MSG_CHECKING([whether or not the linker can find the SHA512 routine that is expected to be provided by OpenSSL])
-AC_SEARCH_LIBS([SHA512], [ssl], [AC_MSG_RESULT([SHA512 routine found.])], [AC_MSG_ERROR([SHA512 routine not found.])])
+AC_MSG_NOTICE([About to check whether or not the linker can find the SHA512 library routine that is expected to be provided by OpenSSL])
+AC_SEARCH_LIBS([SHA512], [ssl], [AC_MSG_RESULT([SHA512 library routine found.])], [AC_MSG_WARN([SHA512 library routine not found.])])
 
 ### --- with thanks to "brianegge" at <https://stackoverflow.com/questions/918676/generate-sha-hash-in-c-using-openssl-library#919375> --- ###
 # AC_LINK_IFELSE(

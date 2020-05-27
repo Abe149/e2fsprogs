@@ -928,6 +928,8 @@ with_multiarch
 with_udev_rules_dir
 with_crond_dir
 with_systemd_unit_dir
+with_OpenSSL
+enable_crypto_badblocks_readWrite
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1597,6 +1599,7 @@ Optional Features:
   --enable-ubsan	  enable undefined behavior sanitizer
   --enable-addrsan	  enable address sanitizer
   --enable-threadsan	  enable thread sanitizer
+--enable-crypto-badblocks-readWrite : enable the "badblocks" feature that provides a secure and trustworthy destructive read-write test in only two complete passes.
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
@@ -1620,6 +1623,8 @@ Optional Packages:
   --with-crond-dir[=DIR]  Install system crontabs into DIR.
   --with-systemd-unit-dir[=DIR]
                           Install systemd system units into DIR.
+  --with-OpenSSL : try to compile and link with the OpenSSL library for its cryptographic hashing functions, to enable the "badblocks" feature that provides a secure and trustworthy destructive read-write test in only two complete passes.
+
 
 Some influential environment variables:
   CC          C compiler command
@@ -14634,27 +14639,46 @@ fi
 
 
 
+
 # --- Abe was here --- #
 
 # maybe TO DO in the future: make this feature also buildable with other libraries besides OpenSSL
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether or not the C compiler can find the OpenSSL SHA header" >&5
-$as_echo_n "checking whether or not the C compiler can find the OpenSSL SHA header... " >&6; }
+
+# Check whether --with-OpenSSL was given.
+if test "${with_OpenSSL+set}" = set; then :
+  withval=$with_OpenSSL; $as_echo "#define with_OpenSSL 1" >>confdefs.h
+
+
+fi
+
+
+# Check whether --enable-crypto-badblocks-readWrite was given.
+if test "${enable_crypto_badblocks_readWrite+set}" = set; then :
+  enableval=$enable_crypto_badblocks_readWrite; $as_echo "#define crypto_badblocks_readWrite 1" >>confdefs.h
+
+
+fi
+
+
+# The next line: _intentionally_ not using "AC_MSG_CHECKING"
+{ $as_echo "$as_me:${as_lineno-$LINENO}: About to check whether or not the C compiler can find the OpenSSL SHA header..." >&5
+$as_echo "$as_me: About to check whether or not the C compiler can find the OpenSSL SHA header..." >&6;}
 ac_fn_c_check_header_mongrel "$LINENO" "openssl/sha.h" "ac_cv_header_openssl_sha_h" "$ac_includes_default"
 if test "x$ac_cv_header_openssl_sha_h" = xyes; then :
 
 $as_echo "#define HAVE_OPENSSL_SHA_H 1" >>confdefs.h
 
 else
-  as_fn_error $? "OpenSSL SHAsums library header (i.e. include file) not found." "$LINENO" 5
+  { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: OpenSSL SHAsums library header (i.e. include file) not found." >&5
+$as_echo "$as_me: WARNING: OpenSSL SHAsums library header (i.e. include file) not found." >&2;}
 
 fi
 
 
 
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether or not the linker can find the SHA512 routine that is expected to be provided by OpenSSL" >&5
-$as_echo_n "checking whether or not the linker can find the SHA512 routine that is expected to be provided by OpenSSL... " >&6; }
+{ $as_echo "$as_me:${as_lineno-$LINENO}: About to check whether or not the linker can find the SHA512 library routine that is expected to be provided by OpenSSL" >&5
+$as_echo "$as_me: About to check whether or not the linker can find the SHA512 library routine that is expected to be provided by OpenSSL" >&6;}
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing SHA512" >&5
 $as_echo_n "checking for library containing SHA512... " >&6; }
 if ${ac_cv_search_SHA512+:} false; then :
@@ -14708,10 +14732,11 @@ $as_echo "$ac_cv_search_SHA512" >&6; }
 ac_res=$ac_cv_search_SHA512
 if test "$ac_res" != no; then :
   test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: SHA512 routine found." >&5
-$as_echo "SHA512 routine found." >&6; }
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: SHA512 library routine found." >&5
+$as_echo "SHA512 library routine found." >&6; }
 else
-  as_fn_error $? "SHA512 routine not found." "$LINENO" 5
+  { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: SHA512 library routine not found." >&5
+$as_echo "$as_me: WARNING: SHA512 library routine not found." >&2;}
 fi
 
 
