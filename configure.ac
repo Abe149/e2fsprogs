@@ -1769,8 +1769,8 @@ AC_ARG_WITH(
            )
 
 AC_ARG_ENABLE(
-              [crypto-badblocks-readWrite],
-              [  --enable-crypto-badblocks-readWrite : enable the "badblocks" feature that provides a secure and trustworthy destructive read-write test in only two complete passes.],
+              [badblocks-crypto-readWrite],
+              [  --enable-badblocks-crypto-readWrite : enable the "badblocks" feature that provides a secure and trustworthy destructive read-write test in only two complete passes.],
               AC_DEFINE([badblocks_crypto_readWrite], 1)
              )
 
@@ -1826,17 +1826,19 @@ dnl #          [LIBS="$LIBS -lssl"], # WIP WIP WIP
 
 LIBS="$LIBS_BACKUP"
 
-echo "TESTING: HAVE_OPENSSL_SHA_H = $HAVE_OPENSSL_SHA_H"
-echo "TESTING: HAVE_OPENSSL_SHA_LIB = $HAVE_OPENSSL_SHA_LIB"
-echo "TESTING: HAVE_OPENSSL_SHA_CAN_COMPILE_AND_LINK = $HAVE_OPENSSL_SHA_CAN_COMPILE_AND_LINK"
+echo "TESTING: HAVE_OPENSSL_SHA_H = ''$HAVE_OPENSSL_SHA_H''"
+echo "TESTING: HAVE_OPENSSL_SHA_LIB = ''$HAVE_OPENSSL_SHA_LIB''"
+echo "TESTING: HAVE_OPENSSL_SHA_CAN_COMPILE_AND_LINK = ''$HAVE_OPENSSL_SHA_CAN_COMPILE_AND_LINK''"
+echo "TESTING: with_OpenSSL = ''$with_OpenSSL''"
+echo "TESTING: badblocks_crypto_readWrite = ''$badblocks_crypto_readWrite''"
 
 if test _$HAVE_OPENSSL_SHA_H = _1 -a _$HAVE_OPENSSL_SHA_LIB = _1 -a _$HAVE_OPENSSL_SHA_CAN_COMPILE_AND_LINK = _1; then
   echo "Detected that all the requirements for OpenSSL-based crypto-badblocks have been met..."
-  if   _$with_OpenSSL != _1 -a _$badblocks_crypto_readWrite != _1; then
+  if   test _$with_OpenSSL != _yes -a _$badblocks_crypto_readWrite != _1; then
     echo "... but both ''with_OpenSSL'' & ''badblocks_crypto_readWrite'' seem  to be disabled."
-  elif _$with_OpenSSL != _1                                      ; then
+  elif test _$with_OpenSSL != _yes                                      ; then
     echo "... but"    "''with_OpenSSL''"                                "seems to be disabled."
-  elif                         _$badblocks_crypto_readWrite != _1; then
+  elif test                           _$badblocks_crypto_readWrite != _1; then
     echo "... but"                       "''badblocks_crypto_readWrite'' seems to be disabled."
   else # pay dirt!  :-)
 dnl #    badblocks_LDFLAGS="$LDFLAGS -lssl" # WIP
