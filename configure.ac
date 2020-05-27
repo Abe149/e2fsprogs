@@ -1759,10 +1759,39 @@ AC_SUBST(systemd_system_unit_dir)
 
 # maybe TO DO in the future: make this feature also buildable with other libraries besides OpenSSL
 
-AC_CHECK_HEADER([openssl/sha.h],
-                [AC_DEFINE([HAVE_OPENSSL_H], 1, [Define to 1 if you have <openssl/sha.h>.])],
+AC_MSG_CHECKING([whether or not the C compiler can find the OpenSSL SHA header])
+AC_CHECK_HEADER(
+                [openssl/sha.h],
+                [AC_DEFINE([HAVE_OPENSSL_SHA_H], 1, [Define to 1 if you have <openssl/sha.h>.])],
                 [AC_MSG_ERROR([OpenSSL SHAsums library header (i.e. include file) not found.])]
                )
+
+
+AC_MSG_CHECKING([whether or not the linker can find the SHA512 routine that is expected to be provided by OpenSSL])
+AC_SEARCH_LIBS([SHA512], [ssl], [AC_MSG_RESULT([SHA512 routine found.])], [AC_MSG_ERROR([SHA512 routine not found.])])
+
+### --- with thanks to "brianegge" at <https://stackoverflow.com/questions/918676/generate-sha-hash-in-c-using-openssl-library#919375> --- ###
+# AC_LINK_IFELSE(
+#                [
+#                 AC_LANG_PROGRAM(
+#                                 [[
+#                                   #include <openssl/sha.h>
+#                                   #include <stdio.h>
+#                                   #include <string.h>
+#                                 ]],
+#                                 [[
+#                                   unsigned char  input_buffer[] = "this is a test of the emergency broadcast system.";
+#                                   unsigned char output_buffer[99]; /* should only need 64, but allowing for overflow */
+#                                   SHA512(input_buffer, strlen(input_buffer), output_buffer);
+#                                 ]]
+#                                )
+#                ],
+#                [AC_MSG_RESULT([yes])]
+#                [AC_DEFINE([HAVE_OPENSSL_SHA_LIB], 1, [Define to 1 if you have an OpenSSL library that at least supports the "SHA512" routine.])]
+#                [LIBS="$LIBS -lssl"],
+#                [AC_MSG_RESULT([no])]
+#                [AC_MSG_ERROR([OpenSSL SHAsums library not found or does not support the "SHA512" routine.])]
+#               )
 
 
 

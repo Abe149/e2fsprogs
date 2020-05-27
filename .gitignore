@@ -235,5 +235,5 @@ util/install-symlink
 util/subst
 util/subst.conf
 Meta
-Builds/
+Builds
 ___not_in_Git/
