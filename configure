@@ -14659,8 +14659,7 @@ fi
 
 # Check whether --enable-badblocks-crypto-readWrite was given.
 if test "${enable_badblocks_crypto_readWrite+set}" = set; then :
-  enableval=$enable_badblocks_crypto_readWrite; $as_echo "#define badblocks_crypto_readWrite 1" >>confdefs.h
-
+  enableval=$enable_badblocks_crypto_readWrite;                         badblocks_crypto_readWrite=yes
 
 fi
 
@@ -14672,6 +14671,7 @@ if test "x$ac_cv_header_openssl_sha_h" = xyes; then :
   HAVE_OPENSSL_SHA_H=1
                 $as_echo "#define HAVE_OPENSSL_SHA_H 1" >>confdefs.h
 
+                           HAVE_OPENSSL_SHA_H=1
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: OpenSSL SHAsums library header (i.e. include file) not found." >&5
 $as_echo "$as_me: WARNING: OpenSSL SHAsums library header (i.e. include file) not found." >&2;}
@@ -14721,9 +14721,9 @@ $as_echo "$ac_cv_lib_ssl_SHA512" >&6; }
 if test "x$ac_cv_lib_ssl_SHA512" = xyes; then :
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: SHA512 library routine found." >&5
 $as_echo "SHA512 library routine found." >&6; }
-             HAVE_OPENSSL_SHA_LIB=1
              $as_echo "#define HAVE_OPENSSL_SHA_LIB 1" >>confdefs.h
 
+                        HAVE_OPENSSL_SHA_LIB=1
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: SHA512 library routine not found." >&5
 $as_echo "$as_me: WARNING: SHA512 library routine not found." >&2;}
@@ -14765,7 +14765,7 @@ if ac_fn_c_try_link "$LINENO"; then :
 $as_echo "yes" >&6; }
                $as_echo "#define HAVE_OPENSSL_SHA_CAN_COMPILE_AND_LINK 1" >>confdefs.h
 
-               HAVE_OPENSSL_SHA_CAN_COMPILE_AND_LINK=1
+                          HAVE_OPENSSL_SHA_CAN_COMPILE_AND_LINK=1
 else
                  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
@@ -14786,14 +14786,14 @@ echo "TESTING: badblocks_crypto_readWrite = ''$badblocks_crypto_readWrite''"
 
 if test _$HAVE_OPENSSL_SHA_H = _1 -a _$HAVE_OPENSSL_SHA_LIB = _1 -a _$HAVE_OPENSSL_SHA_CAN_COMPILE_AND_LINK = _1; then
   echo "Detected that all the requirements for OpenSSL-based crypto-badblocks have been met..."
-  if   test _$with_OpenSSL != _yes -a _$badblocks_crypto_readWrite != _1; then
+  if   test _$with_OpenSSL != _yes -a _$badblocks_crypto_readWrite != _yes; then
     echo "... but both ''with_OpenSSL'' & ''badblocks_crypto_readWrite'' seem  to be disabled."
-  elif test _$with_OpenSSL != _yes                                      ; then
+  elif test _$with_OpenSSL != _yes                                        ; then
     echo "... but"    "''with_OpenSSL''"                                "seems to be disabled."
-  elif test                           _$badblocks_crypto_readWrite != _1; then
+  elif test                           _$badblocks_crypto_readWrite != _yes; then
     echo "... but"                       "''badblocks_crypto_readWrite'' seems to be disabled."
   else # pay dirt!  :-)
-    badblocks_LDFLAGS=$LDFLAGS -lssl
+    badblocks_LDFLAGS="$LDFLAGS -lssl"
 
 
     HAVE_OPENSSL_SHA_H=1

@@ -1771,7 +1771,8 @@ AC_ARG_WITH(
 AC_ARG_ENABLE(
               [badblocks-crypto-readWrite],
               [  --enable-badblocks-crypto-readWrite : enable the "badblocks" feature that provides a secure and trustworthy destructive read-write test in only two complete passes.],
-              AC_DEFINE([badblocks_crypto_readWrite], 1)
+     dnl #    AC_DEFINE([badblocks_crypto_readWrite], 1) # WIP
+              [          badblocks_crypto_readWrite=yes]
              )
 
 dnl # The next line: _intentionally_ not using "AC_MSG_CHECKING" [for reasons of "cleanliness" of output]
@@ -1779,7 +1780,8 @@ AC_MSG_NOTICE([About to check whether or not the C compiler can find the OpenSSL
 AC_CHECK_HEADER(
                 [openssl/sha.h],
                 [HAVE_OPENSSL_SHA_H=1]
-                [AC_DEFINE([HAVE_OPENSSL_SHA_H], 1)],
+                [AC_DEFINE([HAVE_OPENSSL_SHA_H], 1)]
+                [           HAVE_OPENSSL_SHA_H=1],
                 [AC_MSG_WARN([OpenSSL SHAsums library header (i.e. include file) not found.])]
                )
 
@@ -1789,8 +1791,8 @@ AC_CHECK_LIB(
              [ssl],
              [SHA512],
              [AC_MSG_RESULT([SHA512 library routine found.])]
-             [HAVE_OPENSSL_SHA_LIB=1]
-             [AC_DEFINE([HAVE_OPENSSL_SHA_LIB], 1)],
+             [AC_DEFINE([HAVE_OPENSSL_SHA_LIB], 1)]
+             [           HAVE_OPENSSL_SHA_LIB=1],
              [AC_MSG_WARN([SHA512 library routine not found.])]
             )
 
@@ -1818,7 +1820,7 @@ AC_LINK_IFELSE(
                ],
                [AC_MSG_RESULT([yes])]
                [AC_DEFINE([HAVE_OPENSSL_SHA_CAN_COMPILE_AND_LINK], 1)]
-               [HAVE_OPENSSL_SHA_CAN_COMPILE_AND_LINK=1],
+               [           HAVE_OPENSSL_SHA_CAN_COMPILE_AND_LINK=1],
 dnl #          [LIBS="$LIBS -lssl"], # WIP WIP WIP
                [AC_MSG_RESULT([no])]
                [AC_MSG_WARN([OpenSSL SHAsums library not found or does not support the "SHA512" routine.])]
@@ -1834,15 +1836,15 @@ echo "TESTING: badblocks_crypto_readWrite = ''$badblocks_crypto_readWrite''"
 
 if test _$HAVE_OPENSSL_SHA_H = _1 -a _$HAVE_OPENSSL_SHA_LIB = _1 -a _$HAVE_OPENSSL_SHA_CAN_COMPILE_AND_LINK = _1; then
   echo "Detected that all the requirements for OpenSSL-based crypto-badblocks have been met..."
-  if   test _$with_OpenSSL != _yes -a _$badblocks_crypto_readWrite != _1; then
+  if   test _$with_OpenSSL != _yes -a _$badblocks_crypto_readWrite != _yes; then
     echo "... but both ''with_OpenSSL'' & ''badblocks_crypto_readWrite'' seem  to be disabled."
-  elif test _$with_OpenSSL != _yes                                      ; then
+  elif test _$with_OpenSSL != _yes                                        ; then
     echo "... but"    "''with_OpenSSL''"                                "seems to be disabled."
-  elif test                           _$badblocks_crypto_readWrite != _1; then
+  elif test                           _$badblocks_crypto_readWrite != _yes; then
     echo "... but"                       "''badblocks_crypto_readWrite'' seems to be disabled."
   else # pay dirt!  :-)
 dnl #    badblocks_LDFLAGS="$LDFLAGS -lssl" # WIP
-    AC_SUBST(badblocks_LDFLAGS, [$LDFLAGS -lssl])
+    AC_SUBST(badblocks_LDFLAGS, ["$LDFLAGS -lssl"])
 
     AC_SUBST(HAVE_OPENSSL_SHA_H, 1)
     AC_SUBST(HAVE_OPENSSL_SHA_LIB, 1)
