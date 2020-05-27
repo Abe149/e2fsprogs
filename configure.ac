@@ -1756,9 +1756,9 @@ AC_SUBST(systemd_system_unit_dir)
 
 
 
-# --- Abe was here --- #
+dnl # --- Abe was here --- #
 
-# maybe TO DO in the future: make this feature also buildable with other libraries besides OpenSSL
+dnl # maybe TO DO in the future: make this feature also buildable with other libraries besides OpenSSL
 
 AC_ARG_WITH(
             [OpenSSL],
@@ -1772,7 +1772,7 @@ AC_ARG_ENABLE(
               AC_DEFINE([crypto_badblocks_readWrite], 1)
              )
 
-# The next line: _intentionally_ not using "AC_MSG_CHECKING"
+dnl # The next line: _intentionally_ not using "AC_MSG_CHECKING" [for reasons of "cleanliness" of output]
 AC_MSG_NOTICE([About to check whether or not the C compiler can find the OpenSSL SHA header...])
 AC_CHECK_HEADER(
                 [openssl/sha.h],
@@ -1780,8 +1780,15 @@ AC_CHECK_HEADER(
                 [AC_MSG_WARN([OpenSSL SHAsums library header (i.e. include file) not found.])]
                )
 
-AC_MSG_NOTICE([About to check whether or not the linker can find the SHA512 library routine that is expected to be provided by OpenSSL])
-AC_SEARCH_LIBS([SHA512], [ssl], [AC_MSG_RESULT([SHA512 library routine found.])], [AC_MSG_WARN([SHA512 library routine not found.])])
+AC_MSG_NOTICE([About to check whether or not the linker can find the SHA512 library routine that is expected to be provided by OpenSSL...])
+dnl # _intentionally_ not using "AC_SEARCH_LIBS": it adds a match [if found] to the content of the "LIBS" variable, thus adding that library to _all_ executables [and maybe to all libraries?] built by this build.
+AC_CHECK_LIB(
+             [ssl],
+             [SHA512],
+             [AC_MSG_RESULT([SHA512 library routine found.])]
+             [AC_DEFINE([HAVE_OPENSSL_SHA_LIB], 1)],
+             [AC_MSG_WARN([SHA512 library routine not found.])]
+            )
 
 ### --- with thanks to "brianegge" at <https://stackoverflow.com/questions/918676/generate-sha-hash-in-c-using-openssl-library#919375> --- ###
 # AC_LINK_IFELSE(
