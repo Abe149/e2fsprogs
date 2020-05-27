@@ -236,3 +236,4 @@ util/subst
 util/subst.conf
 Meta
 Builds/
+___not_in_Git/

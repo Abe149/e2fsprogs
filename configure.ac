@@ -1754,22 +1754,39 @@ AS_IF([test "x${with_systemd_unit_dir}" != "xno"],
 AC_SUBST(have_systemd)
 AC_SUBST(systemd_system_unit_dir)
 
+
+# --- Abe was here --- #
+
+# maybe TO DO in the future: make this feature also buildable with other libraries besides OpenSSL
+
+AC_CHECK_HEADER([openssl/sha.h],
+                [AC_DEFINE([HAVE_OPENSSL_H], 1, [Define to 1 if you have <openssl/sha.h>.])],
+                [AC_MSG_ERROR([OpenSSL SHAsums library header (i.e. include file) not found.])]
+               )
+
+
+
+
+
 dnl
 dnl Make our output files, being sure that we create the some miscellaneous 
 dnl directories
 dnl
-test -d lib || mkdir lib
-test -d include || mkdir include
+test -d lib           || mkdir lib
+test -d include       || mkdir include
 test -d include/linux || mkdir include/linux
-test -d include/asm || mkdir include/asm
+test -d include/asm   || mkdir include/asm
+
 if test -z "$UUID_CMT" ; then
 	uuid_out_list="lib/uuid/Makefile lib/uuid/uuid.pc \
 		lib/uuid/uuid_types.h"
 fi
+
 if test -z "$BLKID_CMT" ; then
 	blkid_out_list="lib/blkid/Makefile lib/blkid/blkid.pc \
 		lib/blkid/blkid_types.h"
 fi
+
 for i in MCONFIG Makefile \
 	util/Makefile util/subst.conf util/gen-tarball util/install-symlink \
 	lib/et/Makefile lib/ss/Makefile lib/e2p/Makefile \
