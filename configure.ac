@@ -1847,14 +1847,15 @@ echo "TESTING: with_OpenSSL = ''$with_OpenSSL''"
 echo "TESTING: badblocks_crypto_readWrite = ''$badblocks_crypto_readWrite''"
 
 if test _$HAVE_OPENSSL_SHA_H = _1 -a _$HAVE_OPENSSL_SHA_LIB = _1 -a _$HAVE_OPENSSL_SHA_CAN_COMPILE_AND_LINK = _1; then
-  echo "Detected that all the requirements for OpenSSL-based crypto-badblocks have been met..."
+  echo -n "Detected that all the requirements for OpenSSL-based crypto-badblocks have been met"
   if   test _$with_OpenSSL != _yes -a _$badblocks_crypto_readWrite != _yes; then
-    echo "... but both ''with_OpenSSL'' & ''badblocks_crypto_readWrite'' seem  to be disabled."
+    echo ", but both ''with_OpenSSL'' & ''badblocks_crypto_readWrite'' seem  to be disabled."
   elif test _$with_OpenSSL != _yes                                        ; then
-    echo "... but"    "''with_OpenSSL''"                                "seems to be disabled."
+    echo ", but"    "''with_OpenSSL''"                                "seems to be disabled."
   elif test                           _$badblocks_crypto_readWrite != _yes; then
-    echo "... but"                       "''badblocks_crypto_readWrite'' seems to be disabled."
+    echo ", but"                       "''badblocks_crypto_readWrite'' seems to be disabled."
   else # pay dirt!  :-)
+    echo . # finish up the earlier "echo -n"
     AC_SUBST(badblocks_with_crypto_LDFLAGS, ["$LDFLAGS -lssl"])
 
     AC_SUBST(HAVE_OPENSSL_SHA_H, 1)
@@ -1862,7 +1863,6 @@ if test _$HAVE_OPENSSL_SHA_H = _1 -a _$HAVE_OPENSSL_SHA_LIB = _1 -a _$HAVE_OPENS
     AC_SUBST(HAVE_OPENSSL_SHA_CAN_COMPILE_AND_LINK, 1)
   fi
 fi
-
 
 dnl # --- ^^^ --- Abe was here --- ^^^ --- #
 
