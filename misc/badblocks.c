@@ -1370,3 +1370,5 @@ int main (int argc, char ** argv)
 	free(t_patts);
 	return 0;
 }
+
+/* vim: ts=8 */
