@@ -364,7 +364,10 @@ badblocks_with_crypto: $(BADBLOCKS_WITH_CRYPTO_OBJS) $(DEPLIBS)
 	$(Q) $(CC) $(ALL_LDFLAGS) @badblocks_with_crypto_LDFLAGS@ -o badblocks_with_crypto $(BADBLOCKS_WITH_CRYPTO_OBJS) $(LIBS) \
 		$(LIBINTL) $(SYSLIBS)
 
-badblocks.profiled: $(BADBLOCKS_OBJS) $(PROFILED_DEPLIBS)
+# The next non-comment line used to be:
+#   badblocks.profiled: $(BADBLOCKS_OBJS) $(PROFILED_DEPLIBS)
+# This is a proposed bug-fix by Abe May 28 2020
+badblocks.profiled: $(PROFILED_BADBLOCKS_OBJS) $(PROFILED_DEPLIBS)
 	$(E) "	LD $@"
 	$(Q) $(CC) $(ALL_LDFLAGS) -g -pg -o badblocks.profiled \
 		$(PROFILED_BADBLOCKS_OBJS) $(PROFILED_LIBS) $(LIBINTL) \
