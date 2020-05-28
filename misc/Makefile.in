@@ -59,6 +59,7 @@ UUIDGEN_OBJS=	uuidgen.o
 UUIDD_OBJS=	uuidd.o
 DUMPE2FS_OBJS=	dumpe2fs.o
 BADBLOCKS_OBJS=	badblocks.o
+BADBLOCKS_WITH_CRYPTO_OBJS= badblocks_with_crypto.o
 E2IMAGE_OBJS=	e2image.o
 FSCK_OBJS=	fsck.o base_device.o ismounted.o
 BLKID_OBJS=	blkid.o
@@ -353,9 +354,14 @@ fsck.profiled: $(FSCK_OBJS) $(PROFILED_DEPLIBBLKID)
 	$(Q) $(CC) $(ALL_LDFLAGS) -g -pg -o fsck.profiled $(PROFILED_FSCK_OBJS) \
 		$(PROFILED_LIBBLKID) $(LIBINTL) $(SYSLIBS)
 
-badblocks: $(BADBLOCKS_OBJS) $(DEPLIBS)
+badblocks:             $(BADBLOCKS_OBJS)             $(DEPLIBS)
 	$(E) "	LD $@"
-	$(Q) $(CC) $(ALL_LDFLAGS) @badblocks_LDFLAGS@ -o badblocks $(BADBLOCKS_OBJS) $(LIBS) \
+	$(Q) $(CC) $(ALL_LDFLAGS)                                 -o badblocks             $(BADBLOCKS_OBJS)             $(LIBS) \
+		$(LIBINTL) $(SYSLIBS)
+
+badblocks_with_crypto: $(BADBLOCKS_WITH_CRYPTO_OBJS) $(DEPLIBS)
+	$(E) "	LD $@"
+	$(Q) $(CC) $(ALL_LDFLAGS) @badblocks_with_crypto_LDFLAGS@ -o badblocks_with_crypto $(BADBLOCKS_WITH_CRYPTO_OBJS) $(LIBS) \
 		$(LIBINTL) $(SYSLIBS)
 
 badblocks.profiled: $(BADBLOCKS_OBJS) $(PROFILED_DEPLIBS)

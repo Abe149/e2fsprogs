@@ -1772,7 +1772,6 @@ dnl #            AC_DEFINE([with_OpenSSL], 1)
 AC_ARG_ENABLE(
               [badblocks-crypto-readWrite],
               [  --enable-badblocks-crypto-readWrite : enable the "badblocks" feature that provides a secure and trustworthy destructive read-write test in only two complete passes.],
-     dnl #    AC_DEFINE([badblocks_crypto_readWrite], 1) # WIP
               [          badblocks_crypto_readWrite=yes]
              )
 
@@ -1815,7 +1814,6 @@ AC_CHECK_LIB(
 
 ### --- with thanks to "brianegge" at <https://stackoverflow.com/questions/918676/generate-sha-hash-in-c-using-openssl-library#919375> --- ###
 AC_MSG_NOTICE([About to check whether or not we can compile _and_ link a program that depends on the SHA512 library routine that is expected to be provided by OpenSSL...])
-dnl # LIBS="$LIBS -lssl" LDFLAGS="$LDFLAGS -lssl" AC_LINK_IFELSE( # didn`t work
 
 LIBS_BACKUP="$LIBS"
 LIBS="$LIBS -lssl"
@@ -1838,7 +1836,6 @@ AC_LINK_IFELSE(
                [AC_MSG_RESULT([yes])]
                [AC_DEFINE([HAVE_OPENSSL_SHA_CAN_COMPILE_AND_LINK], 1)]
                [           HAVE_OPENSSL_SHA_CAN_COMPILE_AND_LINK=1],
-dnl #          [LIBS="$LIBS -lssl"], # WIP WIP WIP
                [AC_MSG_RESULT([no])]
                [AC_MSG_WARN([OpenSSL SHAsums library not found or does not support the "SHA512" routine.])]
               )
@@ -1860,8 +1857,7 @@ if test _$HAVE_OPENSSL_SHA_H = _1 -a _$HAVE_OPENSSL_SHA_LIB = _1 -a _$HAVE_OPENS
   elif test                           _$badblocks_crypto_readWrite != _yes; then
     echo "... but"                       "''badblocks_crypto_readWrite'' seems to be disabled."
   else # pay dirt!  :-)
-dnl #    badblocks_LDFLAGS="$LDFLAGS -lssl" # WIP
-    AC_SUBST(badblocks_LDFLAGS, ["$LDFLAGS -lssl"])
+    AC_SUBST(badblocks_with_crypto_LDFLAGS, ["$LDFLAGS -lssl"])
 
     AC_SUBST(HAVE_OPENSSL_SHA_H, 1)
     AC_SUBST(HAVE_OPENSSL_SHA_LIB, 1)
