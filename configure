@@ -1630,6 +1630,7 @@ Optional Packages:
   --with-OpenSSL : try to compile and link with the OpenSSL library for its cryptographic hashing functions, to enable the "badblocks" feature that provides a secure and trustworthy destructive read-write test in only two complete passes.
 
 
+
 Some influential environment variables:
   CC          C compiler command
   CFLAGS      C compiler flags
@@ -14651,9 +14652,7 @@ fi
 
 # Check whether --with-OpenSSL was given.
 if test "${with_OpenSSL+set}" = set; then :
-  withval=$with_OpenSSL; $as_echo "#define with_OpenSSL 1" >>confdefs.h
-
-
+  withval=$with_OpenSSL;
 fi
 
 
@@ -14664,12 +14663,19 @@ if test "${enable_badblocks_crypto_readWrite+set}" = set; then :
 fi
 
 
+
+
+
+
+
+
+
+
 { $as_echo "$as_me:${as_lineno-$LINENO}: About to check whether or not the C compiler can find the OpenSSL SHA header..." >&5
 $as_echo "$as_me: About to check whether or not the C compiler can find the OpenSSL SHA header..." >&6;}
 ac_fn_c_check_header_mongrel "$LINENO" "openssl/sha.h" "ac_cv_header_openssl_sha_h" "$ac_includes_default"
 if test "x$ac_cv_header_openssl_sha_h" = xyes; then :
-  HAVE_OPENSSL_SHA_H=1
-                $as_echo "#define HAVE_OPENSSL_SHA_H 1" >>confdefs.h
+  $as_echo "#define HAVE_OPENSSL_SHA_H 1" >>confdefs.h
 
                            HAVE_OPENSSL_SHA_H=1
 else

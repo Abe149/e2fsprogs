@@ -1764,8 +1764,9 @@ dnl # maybe TO DO in the future: make this feature also buildable with other lib
 
 AC_ARG_WITH(
             [OpenSSL],
-            AC_HELP_STRING([--with-OpenSSL : try to compile and link with the OpenSSL library for its cryptographic hashing functions, to enable the "badblocks" feature that provides a secure and trustworthy destructive read-write test in only two complete passes.]),
-            AC_DEFINE([with_OpenSSL], 1)
+            AC_HELP_STRING([--with-OpenSSL : try to compile and link with the OpenSSL library for its cryptographic hashing functions, to enable the "badblocks" feature that provides a secure and trustworthy destructive read-write test in only two complete passes.])
+dnl #            ,
+dnl #            AC_DEFINE([with_OpenSSL], 1)
            )
 
 AC_ARG_ENABLE(
@@ -1775,11 +1776,27 @@ AC_ARG_ENABLE(
               [          badblocks_crypto_readWrite=yes]
              )
 
+AH_TEMPLATE(
+            [HAVE_OPENSSL_SHA_H],
+            [This should be defined to 1 if and only if the appropriate header was found during configuration.]
+           )
+
+AH_TEMPLATE(
+            [HAVE_OPENSSL_SHA_LIB],
+            [This should be defined to 1 if and only if the appropriate header was found during configuration.]
+           )
+
+AH_TEMPLATE(
+            [HAVE_OPENSSL_SHA_CAN_COMPILE_AND_LINK],
+            [This should be defined to 1 if and only if the appropriate header was found during configuration.]
+           )
+
+
+
 dnl # The next line: _intentionally_ not using "AC_MSG_CHECKING" [for reasons of "cleanliness" of output]
 AC_MSG_NOTICE([About to check whether or not the C compiler can find the OpenSSL SHA header...])
 AC_CHECK_HEADER(
                 [openssl/sha.h],
-                [HAVE_OPENSSL_SHA_H=1]
                 [AC_DEFINE([HAVE_OPENSSL_SHA_H], 1)]
                 [           HAVE_OPENSSL_SHA_H=1],
                 [AC_MSG_WARN([OpenSSL SHAsums library header (i.e. include file) not found.])]

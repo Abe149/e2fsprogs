@@ -346,6 +346,18 @@
 /* Define to 1 if you have the `open64' function. */
 #undef HAVE_OPEN64
 
+/* This should be defined to 1 if and only if the appropriate header was found
+   during configuration. */
+#undef HAVE_OPENSSL_SHA_CAN_COMPILE_AND_LINK
+
+/* This should be defined to 1 if and only if the appropriate header was found
+   during configuration. */
+#undef HAVE_OPENSSL_SHA_H
+
+/* This should be defined to 1 if and only if the appropriate header was found
+   during configuration. */
+#undef HAVE_OPENSSL_SHA_LIB
+
 /* Define to 1 if optreset for getopt is present */
 #undef HAVE_OPTRESET
 
