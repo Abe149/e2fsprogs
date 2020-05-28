@@ -126,12 +126,31 @@ COMPILE_ET=	_ET_DIR_OVERRIDE=$(srcdir)/../lib/et/et ../lib/et/compile_et
 JOURNAL_CFLAGS = -I$(srcdir)/../e2fsck $(ALL_CFLAGS) -DDEBUGFS
 DEPEND_CFLAGS = -I$(top_srcdir)/e2fsck
 
+
+
 .c.o:
 	$(E) "	CC $<"
 	$(Q) $(CC) -c $(ALL_CFLAGS) $< -o $@
 	$(Q) $(CHECK_CMD) $(ALL_CFLAGS) $<
 	$(Q) $(CPPCHECK_CMD) $(CPPFLAGS) $<
 @PROFILE_CMT@	$(Q) $(CC) $(ALL_CFLAGS) -g -pg -o profiled/$*.o -c $<
+
+profiled/badblocks.o: $(srcdir)/badblocks.c
+	$(E) "	CC $<"
+	$(Q) $(CHECK_CMD) $(ALL_CFLAGS) $<
+	$(Q) $(CPPCHECK_CMD) $(CPPFLAGS) $<
+#"$(Q)" disabled so we will be able to see the crypto-disabling macro being injected
+# @PROFILE_CMT@	$(Q) $(CC) $(ALL_CFLAGS) -DDISABLE_CRYPTO -g -pg -o profiled/$*.o -c $<
+@PROFILE_CMT@	       $(CC) $(ALL_CFLAGS) -DDISABLE_CRYPTO -g -pg -o profiled/$*.o -c $<
+
+badblocks.o: $(srcdir)/badblocks.c
+	$(E) "	CC $<"
+#"$(Q)" disabled so we will be able to see the crypto-disabling macro being injected
+#	$(Q) $(CC) -c $(ALL_CFLAGS) -DDISABLE_CRYPTO $< -o $@
+	     $(CC) -c $(ALL_CFLAGS) -DDISABLE_CRYPTO $< -o $@
+	$(Q) $(CHECK_CMD) $(ALL_CFLAGS) $<
+	$(Q) $(CPPCHECK_CMD) $(CPPFLAGS) $<
+
 
 all:: profiled $(SPROGS) $(UPROGS) $(USPROGS) $(SMANPAGES) $(UMANPAGES) \
 	$(FMANPAGES) $(LPROGS) $(E4DEFRAG_PROG) $(E4CRYPT_PROGS) e2fuzz
