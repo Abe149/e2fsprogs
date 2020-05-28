@@ -117,7 +117,13 @@ static void usage(void)
 static void exclusive_usage(void)
 {
 	fprintf(stderr,
-		_("%s: The -n and -w options are mutually exclusive.\n\n"),
+		_("%s: The \"-n\""
+#if defined(GREEN_LIGHT_FOR_CRYPTO) && GREEN_LIGHT_FOR_CRYPTO>0
+		", \"-w\", and \"-Z\""
+#else
+		" and \"-w\""
+#endif
+    " options are mutually exclusive.\n\n"),
 		program_name);
 	exit(1);
 }
