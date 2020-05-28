@@ -638,7 +638,8 @@ install: all $(SMANPAGES) $(UMANPAGES) installdirs
 		$(ES) "	INSTALL_DATA $(root_sysconfdir)/mke2fs.conf"; \
 		$(INSTALL_DATA) mke2fs.conf \
 			$(DESTDIR)$(root_sysconfdir)/mke2fs.conf; \
-	fi
+	fi; \
+  $(ES) " LINK badblocks_with_crypto.8"; (cd $(DESTDIR)$(man8dir) && $(LN_S) $(LINK_INSTALL_FLAGS) badblocks.8 badblocks_with_crypto.8);
 
 install-strip: install
 	$(Q) for i in $(SPROGS); do \
