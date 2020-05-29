@@ -27,6 +27,9 @@
  *                       blocks known to be bad, multiple passes to
  *                       make sure that no new blocks are added to the
  *                       list.  (Work done by David Beattie)
+ * May/June 2020 - added features [and the required related bugs ;-)]
+ *                 for crypto-based only-2-or-3-passes-at-your-option
+ *                 thorough read-write testing  (damage done by Abe Skolnik)
  */
 
 #ifndef _GNU_SOURCE
