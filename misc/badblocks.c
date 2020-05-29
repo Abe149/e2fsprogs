@@ -1014,6 +1014,9 @@ static unsigned int test_nd (int dev, blk_t last_block,
 /* forward declaration needed for the following function`s use inside "test___cryptoBased_readWrite_WITH_postZeroing" */
 static unsigned int test___cryptoBased_readWrite_withOUT_postZeroing(int, blk_t, int, blk_t, unsigned int);
 
+/* the next line: DRY principle */
+#define VERBOSE_DEBUG_OUTPUT_FOR_TEST_FUNCTIONS  if (v_flag)  fprintf(stderr, "\ndev = %d, last_block = %lu, block_size = %d, first_block = %lu, blocks_at_once = %u\n", dev, last_block, block_size, first_block, blocks_at_once);
+
 static unsigned int test___cryptoBased_readWrite_WITH_postZeroing /* the rest of this function header represents an interface that is mandated by the scaffolding that calls this function */
 			(int dev, blk_t last_block,
 			 int block_size, blk_t first_block,
@@ -1021,7 +1024,7 @@ static unsigned int test___cryptoBased_readWrite_WITH_postZeroing /* the rest of
 {
 	/* return bb_count; */ /* this is the intended result of this function, as per the scaffolding that calls it */
 	fprintf(stderr, "\n''test___cryptoBased_readWrite_WITH_postZeroing'' was called.\n"); /* WIP WIP WIP */
-	if (v_flag)  fprintf(stderr, "\ndev = %d, last_block = %lu, block_size = %d, first_block = %lu, blocks_at_once = %u\n", dev, last_block, block_size, first_block, blocks_at_once);
+	VERBOSE_DEBUG_OUTPUT_FOR_TEST_FUNCTIONS
 
 	/* call the other test function to do the hard part of this function`s job */
 	/* "const", if allowed in this file? */ unsigned int to_return = test___cryptoBased_readWrite_withOUT_postZeroing(dev, last_block, block_size, first_block, blocks_at_once);
@@ -1042,7 +1045,8 @@ static unsigned int test___cryptoBased_readWrite_withOUT_postZeroing /* the rest
 {
 	/* return bb_count; */ /* this is the intended result of this function, as per the scaffolding that calls it */
 	fprintf(stderr, "\n''test___cryptoBased_readWrite_withOUT_postZeroing'' was called.\n"); /* WIP WIP WIP */
-	if (v_flag)  fprintf(stderr, "\ndev = %d, last_block = %lu, block_size = %d, first_block = %lu, blocks_at_once = %u\n", dev, last_block, block_size, first_block, blocks_at_once);
+	VERBOSE_DEBUG_OUTPUT_FOR_TEST_FUNCTIONS
+
 	return 0; /* WIP WIP WIP */
 }
 
