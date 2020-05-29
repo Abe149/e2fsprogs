@@ -1009,6 +1009,37 @@ static unsigned int test_nd (int dev, blk_t last_block,
 	return bb_count;
 }
 
+
+
+
+
+
+static unsigned int test___cryptoBased_readWrite_WITH_postZeroing /* the rest of this function header represents an interface that is mandated by the scaffolding that calls this function */
+			(int dev, blk_t last_block,
+			 int block_size, blk_t first_block,
+			 unsigned int blocks_at_once)
+{
+	/* return bb_count; */ /* this is the intended result of this function, as per the scaffolding that calls it */
+	   return 0; /* WIP WIP WIP */
+}
+
+
+
+static unsigned int test___cryptoBased_readWrite_withOUT_postZeroing /* the rest of this function header represents an interface that is mandated by the scaffolding that calls this function */
+			(int dev, blk_t last_block,
+			 int block_size, blk_t first_block,
+			 unsigned int blocks_at_once)
+{
+	/* return bb_count; */ /* this is the intended result of this function, as per the scaffolding that calls it */
+	   return 0; /* WIP WIP WIP */
+}
+
+
+
+
+
+
+
 static void check_mount(char *device_name)
 {
 	errcode_t	retval;
