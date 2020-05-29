@@ -1,5 +1,5 @@
 /*
- * badblocks.c		- Bad blocks checker
+ * badblocks.c - Bad blocks checker
  *
  * Copyright (C) 1992, 1993, 1994  Remy Card <card@masi.ibp.fr>
  *                                 Laboratoire MASI, Institut Blaise Pascal
@@ -19,14 +19,14 @@
 
 /*
  * History:
- * 93/05/26	- Creation from e2fsck
- * 94/02/27	- Made a separate bad blocks checker
+ * 93/05/26 - Creation from e2fsck
+ * 94/02/27 - Made a separate bad blocks checker
  * 99/06/30...99/07/26 - Added non-destructive write-testing,
  *                       configurable blocks-at-once parameter,
- * 			 loading of badblocks list to avoid testing
- * 			 blocks known to be bad, multiple passes to
- * 			 make sure that no new blocks are added to the
- * 			 list.  (Work done by David Beattie)
+ *                       loading of badblocks list to avoid testing
+ *                       blocks known to be bad, multiple passes to
+ *                       make sure that no new blocks are added to the
+ *                       list.  (Work done by David Beattie)
  */
 
 #ifndef _GNU_SOURCE
