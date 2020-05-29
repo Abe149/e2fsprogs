@@ -1020,7 +1020,9 @@ static unsigned int test___cryptoBased_readWrite_WITH_postZeroing /* the rest of
 			 unsigned int blocks_at_once)
 {
 	/* return bb_count; */ /* this is the intended result of this function, as per the scaffolding that calls it */
-	   return 0; /* WIP WIP WIP */
+	fprintf(stderr, "\n''test___cryptoBased_readWrite_WITH_postZeroing'' was called.\n"); /* WIP WIP WIP */
+	if (v_flag)  fprintf(stderr, "\ndev = %d, block_size = %d, blocks_at_once = %ud", dev, block_size, blocks_at_once);
+	return 0; /* WIP WIP WIP */
 }
 
 
@@ -1031,6 +1033,8 @@ static unsigned int test___cryptoBased_readWrite_withOUT_postZeroing /* the rest
 			 unsigned int blocks_at_once)
 {
 	/* return bb_count; */ /* this is the intended result of this function, as per the scaffolding that calls it */
+	fprintf(stderr, "\n''test___cryptoBased_readWrite_withOUT_postZeroing'' was called.\n"); /* WIP WIP WIP */
+	if (v_flag)  fprintf(stderr, "\ndev = %d, block_size = %d, blocks_at_once = %ud", dev, block_size, blocks_at_once);
 	   return 0; /* WIP WIP WIP */
 }
 
