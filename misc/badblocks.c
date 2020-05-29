@@ -1021,7 +1021,7 @@ static unsigned int test___cryptoBased_readWrite_WITH_postZeroing /* the rest of
 {
 	/* return bb_count; */ /* this is the intended result of this function, as per the scaffolding that calls it */
 	fprintf(stderr, "\n''test___cryptoBased_readWrite_WITH_postZeroing'' was called.\n"); /* WIP WIP WIP */
-	if (v_flag)  fprintf(stderr, "\ndev = %d, block_size = %d, blocks_at_once = %ud", dev, block_size, blocks_at_once);
+	if (v_flag)  fprintf(stderr, "\ndev = %d, block_size = %d, blocks_at_once = %u\n", dev, block_size, blocks_at_once);
 
 	/* call the other test function to do the hard part of this function`s job */
 	/* "const", if allowed in this file? */ unsigned int to_return = test___cryptoBased_readWrite_withOUT_postZeroing(dev, last_block, block_size, first_block, blocks_at_once);
@@ -1042,7 +1042,7 @@ static unsigned int test___cryptoBased_readWrite_withOUT_postZeroing /* the rest
 {
 	/* return bb_count; */ /* this is the intended result of this function, as per the scaffolding that calls it */
 	fprintf(stderr, "\n''test___cryptoBased_readWrite_withOUT_postZeroing'' was called.\n"); /* WIP WIP WIP */
-	if (v_flag)  fprintf(stderr, "\ndev = %d, block_size = %d, blocks_at_once = %ud", dev, block_size, blocks_at_once);
+	if (v_flag)  fprintf(stderr, "\ndev = %d, block_size = %d, blocks_at_once = %u\n", dev, block_size, blocks_at_once);
 	   return 0; /* WIP WIP WIP */
 }
 
