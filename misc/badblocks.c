@@ -675,6 +675,7 @@ static unsigned int test_rw (int dev, blk_t last_block,
 				try = last_block - currently_testing;
 			got = do_write(dev, buffer, try, block_size,
 					currently_testing);
+		fprintf(stderr, "                                             TESTING: got = %d, dev = %d, buffer = %llu, try = %d, block_size = %d, currently_testing = %d ...\n",  got, dev, buffer, try, block_size, currently_testing); // WIP DEBUG
 			if (v_flag > 1)
 				print_status();
 
@@ -1043,24 +1044,32 @@ static unsigned int test___cryptoBased_readWrite_WITH_postZeroing /* the rest of
 	pattern_fill(buffer, ZERO, blocks_at_once * block_size);
 	#undef ZERO
 
+	num_blocks = last_block - 1; /* cargo-cult copy+paste */
+
 	int number_of_blocks_to_TRY_to_write_in_one_write = blocks_at_once, got;
 	currently_testing = first_block;
 
 	while (currently_testing < last_block) {
-		fprintf(stderr, ".");
+//		fprintf(stderr, ".");
 		if (currently_testing + number_of_blocks_to_TRY_to_write_in_one_write > last_block)
 			number_of_blocks_to_TRY_to_write_in_one_write = last_block - currently_testing;
+
 		got = do_write(dev, buffer, number_of_blocks_to_TRY_to_write_in_one_write, block_size, currently_testing);
+		fprintf(stderr, "                                             TESTING: got = %d, dev = %d, buffer = %llu, number_of_blocks_to_TRY_to_write_in_one_write = %d, block_size = %d, currently_testing = %d ...\n",  got, dev, buffer, number_of_blocks_to_TRY_to_write_in_one_write, block_size, currently_testing); // WIP DEBUG
+
 		if (v_flag > 1)  print_status();
+
+		if (got < 1)  exit(-1);
 
 		currently_testing += got;
 		if (got != number_of_blocks_to_TRY_to_write_in_one_write) {
-//			fprintf(stderr, "                                             TESTING: got = %d, try = %d ...\n", got, try);
 			number_of_blocks_to_TRY_to_write_in_one_write = 1;
 			continue;
 		}
 	} /* end while */
 
+	if (s_flag | v_flag)  fputs(_(done_string), stderr);
+	flush_bufs();
 
 	/* WIP WIP WIP */
 
