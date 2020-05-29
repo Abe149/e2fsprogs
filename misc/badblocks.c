@@ -105,7 +105,7 @@ static void usage(void)
 	fprintf(stderr, _(
 "Usage: %s [-b block_size] [-i input_file] [-o output_file] [-svwnfBX"
 #if defined(GREEN_LIGHT_FOR_CRYPTO) && GREEN_LIGHT_FOR_CRYPTO>0
-"Z"
+"Z0"
 #endif
 "]\n       [-c blocks_at_once] [-d delay_factor_between_reads] [-e max_bad_blocks]\n"
 "       [-p num_passes] [-t test_pattern [-t test_pattern [...]]]\n"
@@ -1108,7 +1108,8 @@ int main (int argc, char ** argv)
 #endif /* HAVE_SYSCONF */
 
 #if defined(GREEN_LIGHT_FOR_CRYPTO) && GREEN_LIGHT_FOR_CRYPTO>0
-	char crypto_enabled_via_CLI_arg = 0; /* is/are "bool"/"_Bool" allowed in this codebase? */
+	/* is/are "bool"/"_Bool" allowed in this codebase? */
+	char crypto_enabled_via_CLI_arg = 0, zero_drive_after_cryptoBased_test = 0;
 #endif
 
 	if (argc && *argv)
@@ -1117,7 +1118,7 @@ int main (int argc, char ** argv)
 			    argc,
 			    argv, 
 #if defined(GREEN_LIGHT_FOR_CRYPTO) && GREEN_LIGHT_FOR_CRYPTO>0
-			    "b:d:e:fi:o:svwnc:p:h:t:BXZ"
+			    "b:d:e:fi:o:svwnc:p:h:t:BXZ0"
 #else
 			    "b:d:e:fi:o:svwnc:p:h:t:BX"
 #endif
@@ -1214,6 +1215,10 @@ int main (int argc, char ** argv)
 		case 'Z':
 			crypto_enabled_via_CLI_arg = 1;
 			printf("WIP warning: crypto_enabled_via_CLI_arg now = %d, but feature programming not yet complete.\n", crypto_enabled_via_CLI_arg); /* WIP WIP WIP */
+			break;
+		case '0':
+			zero_drive_after_cryptoBased_test = 1;
+			printf("WIP warning: zero_drive_after_cryptoBased_test now = %d, but feature programming not yet complete.\n", zero_drive_after_cryptoBased_test); /* WIP WIP WIP */
 			break;
 #endif
 		default:
