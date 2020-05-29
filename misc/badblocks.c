@@ -1214,17 +1214,24 @@ int main (int argc, char ** argv)
 #if defined(GREEN_LIGHT_FOR_CRYPTO) && GREEN_LIGHT_FOR_CRYPTO>0
 		case 'Z':
 			crypto_enabled_via_CLI_arg = 1;
-			printf("WIP warning: crypto_enabled_via_CLI_arg now = %d, but feature programming not yet complete.\n", crypto_enabled_via_CLI_arg); /* WIP WIP WIP */
+			printf("\nWIP warning: crypto_enabled_via_CLI_arg now = %d, but feature programming not yet complete.\n\n", crypto_enabled_via_CLI_arg); /* WIP WIP WIP */
 			break;
 		case '0':
 			zero_drive_after_cryptoBased_test = 1;
-			printf("WIP warning: zero_drive_after_cryptoBased_test now = %d, but feature programming not yet complete.\n", zero_drive_after_cryptoBased_test); /* WIP WIP WIP */
+			printf("\nWIP warning: zero_drive_after_cryptoBased_test now = %d, but feature programming not yet complete.\n\n", zero_drive_after_cryptoBased_test); /* WIP WIP WIP */
 			break;
 #endif
 		default:
 			usage();
 		}
-	}
+	} /* done/finished with "getopt" */
+
+#if defined(GREEN_LIGHT_FOR_CRYPTO) && GREEN_LIGHT_FOR_CRYPTO>0
+	// char crypto_enabled_via_CLI_arg = 0, zero_drive_after_cryptoBased_test = 0;
+			printf("\nWIP info: crypto_enabled_via_CLI_arg = %d after finishing ''getopt'' phase, but feature programming not yet complete.\n\n", crypto_enabled_via_CLI_arg); /* WIP WIP WIP */
+			printf("\nWIP info: zero_drive_after_cryptoBased_test = %d after finishing ''getopt'' phase, but feature programming not yet complete.\n\n", zero_drive_after_cryptoBased_test); /* WIP WIP WIP */
+#endif
+
 	if (!w_flag) {
 		if (t_flag > 1) {
 			com_err(program_name, 0, "%s",
