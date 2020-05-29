@@ -1264,10 +1264,18 @@ int main (int argc, char ** argv)
 			use_cryptoBased_readWrite_test_mode = 1;
 			printf("\nWIP warning: use_cryptoBased_readWrite_test_mode now = %d, but feature programming not yet complete.\n\n", use_cryptoBased_readWrite_test_mode); /* WIP WIP WIP */
 			if (w_flag)  exclusive_usage();
+
+			/* reason for the condition on the next line: to make "-0Z" mean the same thing as "-Z0"; otherwise, it might be _very_ confusing for the user */
+			if (test_func != test___cryptoBased_readWrite_WITH_postZeroing)
+				test_func = test___cryptoBased_readWrite_withOUT_postZeroing;
 			break;
 		case '0':
+/* design note: should I/we make "-0" without "-Z' an error, instead of allowing it to mean the same thing as both "-0Z" & "-Z0"? */
 			zero_drive_after_cryptoBased_test = 1;
-			printf("\nWIP warning: zero_drive_after_cryptoBased_test now = %d, but feature programming not yet complete.\n\n", zero_drive_after_cryptoBased_test); /* WIP WIP WIP */
+			use_cryptoBased_readWrite_test_mode = 1;
+			printf("\nWIP warning: use_cryptoBased_readWrite_test_mode now = %d, but feature programming not yet complete.\n", use_cryptoBased_readWrite_test_mode); /* WIP WIP WIP */
+			printf(  "WIP warning: zero_drive_after_cryptoBased_test now = %d, but feature programming not yet complete.\n\n", zero_drive_after_cryptoBased_test); /* WIP WIP WIP */
+			test_func = test___cryptoBased_readWrite_WITH_postZeroing;
 			break;
 #endif
 		default:
@@ -1276,6 +1284,9 @@ int main (int argc, char ** argv)
 	} /* done/finished with "getopt" */
 
 #if defined(GREEN_LIGHT_FOR_CRYPTO) && GREEN_LIGHT_FOR_CRYPTO>0
+
+/* design note: should I/we make "-0" without "-Z' an error, instead of allowing it to mean the same thing as both "-0Z" & "-Z0"? */
+
 	if (v_flag) {
 			fprintf(stderr, "\nINFO: use_cryptoBased_readWrite_test_mode = %d after finishing ''getopt'' phase, but feature programming not yet complete.\n\n", use_cryptoBased_readWrite_test_mode); /* WIP WIP WIP */
 			fprintf(stderr, "\nINFO: zero_drive_after_cryptoBased_test = %d after finishing ''getopt'' phase, but feature programming not yet complete.\n\n", zero_drive_after_cryptoBased_test); /* WIP WIP WIP */
