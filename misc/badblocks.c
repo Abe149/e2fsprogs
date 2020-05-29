@@ -1109,7 +1109,7 @@ int main (int argc, char ** argv)
 
 #if defined(GREEN_LIGHT_FOR_CRYPTO) && GREEN_LIGHT_FOR_CRYPTO>0
 	/* is/are "bool"/"_Bool" allowed in this codebase? */
-	char crypto_enabled_via_CLI_arg = 0, zero_drive_after_cryptoBased_test = 0;
+	char use_cryptoBased_readWrite_test_mode = 0, zero_drive_after_cryptoBased_test = 0;
 #endif
 
 	if (argc && *argv)
@@ -1143,14 +1143,24 @@ int main (int argc, char ** argv)
 			v_flag++;
 			break;
 		case 'w':
-			if (w_flag)
-				exclusive_usage();
+			if (
+			    w_flag
+#if defined(GREEN_LIGHT_FOR_CRYPTO) && GREEN_LIGHT_FOR_CRYPTO>0
+			    || use_cryptoBased_readWrite_test_mode
+#endif
+			   ) exclusive_usage();
+
 			test_func = test_rw;
 			w_flag = 1;
 			break;
 		case 'n':
-			if (w_flag)
-				exclusive_usage();
+			if (
+			    w_flag
+#if defined(GREEN_LIGHT_FOR_CRYPTO) && GREEN_LIGHT_FOR_CRYPTO>0
+			    || use_cryptoBased_readWrite_test_mode
+#endif
+			   ) exclusive_usage();
+
 			test_func = test_nd;
 			w_flag = 2;
 			break;
@@ -1213,8 +1223,9 @@ int main (int argc, char ** argv)
 			break;
 #if defined(GREEN_LIGHT_FOR_CRYPTO) && GREEN_LIGHT_FOR_CRYPTO>0
 		case 'Z':
-			crypto_enabled_via_CLI_arg = 1;
-			printf("\nWIP warning: crypto_enabled_via_CLI_arg now = %d, but feature programming not yet complete.\n\n", crypto_enabled_via_CLI_arg); /* WIP WIP WIP */
+			use_cryptoBased_readWrite_test_mode = 1;
+			printf("\nWIP warning: use_cryptoBased_readWrite_test_mode now = %d, but feature programming not yet complete.\n\n", use_cryptoBased_readWrite_test_mode); /* WIP WIP WIP */
+			if (w_flag)  exclusive_usage();
 			break;
 		case '0':
 			zero_drive_after_cryptoBased_test = 1;
@@ -1228,7 +1239,7 @@ int main (int argc, char ** argv)
 
 #if defined(GREEN_LIGHT_FOR_CRYPTO) && GREEN_LIGHT_FOR_CRYPTO>0
 	if (v_flag) {
-			fprintf(stderr, "\nINFO: crypto_enabled_via_CLI_arg = %d after finishing ''getopt'' phase, but feature programming not yet complete.\n\n", crypto_enabled_via_CLI_arg); /* WIP WIP WIP */
+			fprintf(stderr, "\nINFO: use_cryptoBased_readWrite_test_mode = %d after finishing ''getopt'' phase, but feature programming not yet complete.\n\n", use_cryptoBased_readWrite_test_mode); /* WIP WIP WIP */
 			fprintf(stderr, "\nINFO: zero_drive_after_cryptoBased_test = %d after finishing ''getopt'' phase, but feature programming not yet complete.\n\n", zero_drive_after_cryptoBased_test); /* WIP WIP WIP */
 	}
 #endif
