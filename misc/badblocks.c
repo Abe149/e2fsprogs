@@ -1107,9 +1107,21 @@ int main (int argc, char ** argv)
 #endif /* _SC_PAGESIZE */
 #endif /* HAVE_SYSCONF */
 
+#if defined(GREEN_LIGHT_FOR_CRYPTO) && GREEN_LIGHT_FOR_CRYPTO>0
+	char crypto_enabled_via_CLI_arg = 0; /* is/are "bool"/"_Bool" allowed in this codebase? */
+#endif
+
 	if (argc && *argv)
 		program_name = *argv;
-	while ((c = getopt (argc, argv, "b:d:e:fi:o:svwnc:p:h:t:BX")) != EOF) {
+	while ((c = getopt (
+			    argc,
+			    argv, 
+#if defined(GREEN_LIGHT_FOR_CRYPTO) && GREEN_LIGHT_FOR_CRYPTO>0
+			    "b:d:e:fi:o:svwnc:p:h:t:BXZ"
+#else
+			    "b:d:e:fi:o:svwnc:p:h:t:BX"
+#endif
+			   )) != EOF) {
 		switch (c) {
 		case 'b':
 			block_size = parse_uint(optarg, "block size");
@@ -1198,6 +1210,12 @@ int main (int argc, char ** argv)
 		case 'X':
 			exclusive_ok++;
 			break;
+#if defined(GREEN_LIGHT_FOR_CRYPTO) && GREEN_LIGHT_FOR_CRYPTO>0
+		case 'Z':
+			crypto_enabled_via_CLI_arg = 1;
+			printf("WIP warning: crypto_enabled_via_CLI_arg now = %d, but feature programming not yet complete.\n", crypto_enabled_via_CLI_arg); /* WIP WIP WIP */
+			break;
+#endif
 		default:
 			usage();
 		}
@@ -1371,4 +1389,4 @@ int main (int argc, char ** argv)
 	return 0;
 }
 
-/* vim: ts=8 */
+/* vim: ts=8 noet */
