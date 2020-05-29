@@ -1014,7 +1014,7 @@ static unsigned int test_nd (int dev, blk_t last_block,
 /* forward declaration needed for the following function`s use inside "test___cryptoBased_readWrite_WITH_postZeroing" */
 static unsigned int test___cryptoBased_readWrite_withOUT_postZeroing(int, blk_t, int, blk_t, unsigned int);
 
-/* the next line: DRY principle */
+/* the next line: DRY principle; a macro for convenient/easy/quick-at-runTime access to local variables */
 #define VERBOSE_DEBUG_OUTPUT_FOR_TEST_FUNCTIONS  if (v_flag)  fprintf(stderr, "\ndev = %d, last_block = %lu, block_size = %d, first_block = %lu, blocks_at_once = %u\n", dev, last_block, block_size, first_block, blocks_at_once);
 
 static unsigned int test___cryptoBased_readWrite_WITH_postZeroing /* the rest of this function header represents an interface that is mandated by the scaffolding that calls this function */
@@ -1023,15 +1023,48 @@ static unsigned int test___cryptoBased_readWrite_WITH_postZeroing /* the rest of
 			 unsigned int blocks_at_once)
 {
 	/* return bb_count; */ /* this is the intended result of this function, as per the scaffolding that calls it */
-	fprintf(stderr, "\n''test___cryptoBased_readWrite_WITH_postZeroing'' was called.\n"); /* WIP WIP WIP */
+	if (v_flag > 1)  fprintf(stderr, "\n''test___cryptoBased_readWrite_WITH_postZeroing'' was called.\n");
 	VERBOSE_DEBUG_OUTPUT_FOR_TEST_FUNCTIONS
 
-	/* call the other test function to do the hard part of this function`s job */
+	/* call the other crypto-test test function to do the hard part of this function`s job */
 	/* "const", if allowed in this file? */ unsigned int to_return = test___cryptoBased_readWrite_withOUT_postZeroing(dev, last_block, block_size, first_block, blocks_at_once);
 
+	/* --- zero the file/device/drive; intentionally doing this similarly to pre-existing code in "test_rw" --- */
+
+	unsigned char * /* maybe to add here: const */ buffer = allocate_buffer(2 * blocks_at_once * block_size);
+	if (!buffer) {
+		com_err(program_name, ENOMEM, "%s", _("while allocating buffers"));
+		exit(1);
+	}
+
+	flush_bufs();
+
+	#define ZERO (0) /* to make it clearer which 0 we are using to zero the target, i.e. which 0 is the _pattern_ "zero" */
+	pattern_fill(buffer, ZERO, blocks_at_once * block_size);
+	#undef ZERO
+
+	int number_of_blocks_to_TRY_to_write_in_one_write = blocks_at_once, got;
+	currently_testing = first_block;
+
+	while (currently_testing < last_block) {
+		fprintf(stderr, ".");
+		if (currently_testing + number_of_blocks_to_TRY_to_write_in_one_write > last_block)
+			number_of_blocks_to_TRY_to_write_in_one_write = last_block - currently_testing;
+		got = do_write(dev, buffer, number_of_blocks_to_TRY_to_write_in_one_write, block_size, currently_testing);
+		if (v_flag > 1)  print_status();
+
+		currently_testing += got;
+		if (got != number_of_blocks_to_TRY_to_write_in_one_write) {
+//			fprintf(stderr, "                                             TESTING: got = %d, try = %d ...\n", got, try);
+			number_of_blocks_to_TRY_to_write_in_one_write = 1;
+			continue;
+		}
+	} /* end while */
+
+
 	/* WIP WIP WIP */
-		/* TO DO: ZERO THE DEVICE/DRIVE */
-	/* WIP WIP WIP */
+
+	if (v_flag > 1)  fprintf(stderr, "\n''test___cryptoBased_readWrite_WITH_postZeroing'' about to return %d\n", to_return);
 
 	return to_return;
 }
@@ -1043,11 +1076,14 @@ static unsigned int test___cryptoBased_readWrite_withOUT_postZeroing /* the rest
 			 int block_size, blk_t first_block,
 			 unsigned int blocks_at_once)
 {
-	/* return bb_count; */ /* this is the intended result of this function, as per the scaffolding that calls it */
-	fprintf(stderr, "\n''test___cryptoBased_readWrite_withOUT_postZeroing'' was called.\n"); /* WIP WIP WIP */
+	unsigned int count_of_bad_blocks_found = 0u;
+
+	if (v_flag > 1)  fprintf(stderr, "\n''test___cryptoBased_readWrite_withOUT_postZeroing'' was called.\n");
 	VERBOSE_DEBUG_OUTPUT_FOR_TEST_FUNCTIONS
 
-	return 0; /* WIP WIP WIP */
+	if (v_flag > 1)  fprintf(stderr, "\n''test___cryptoBased_readWrite_withOUT_postZeroing'' about to return %d\n", count_of_bad_blocks_found);
+
+	return count_of_bad_blocks_found;
 }
 
 
