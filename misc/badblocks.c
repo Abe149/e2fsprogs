@@ -1227,9 +1227,10 @@ int main (int argc, char ** argv)
 	} /* done/finished with "getopt" */
 
 #if defined(GREEN_LIGHT_FOR_CRYPTO) && GREEN_LIGHT_FOR_CRYPTO>0
-	// char crypto_enabled_via_CLI_arg = 0, zero_drive_after_cryptoBased_test = 0;
-			printf("\nWIP info: crypto_enabled_via_CLI_arg = %d after finishing ''getopt'' phase, but feature programming not yet complete.\n\n", crypto_enabled_via_CLI_arg); /* WIP WIP WIP */
-			printf("\nWIP info: zero_drive_after_cryptoBased_test = %d after finishing ''getopt'' phase, but feature programming not yet complete.\n\n", zero_drive_after_cryptoBased_test); /* WIP WIP WIP */
+	if (v_flag) {
+			fprintf(stderr, "\nINFO: crypto_enabled_via_CLI_arg = %d after finishing ''getopt'' phase, but feature programming not yet complete.\n\n", crypto_enabled_via_CLI_arg); /* WIP WIP WIP */
+			fprintf(stderr, "\nINFO: zero_drive_after_cryptoBased_test = %d after finishing ''getopt'' phase, but feature programming not yet complete.\n\n", zero_drive_after_cryptoBased_test); /* WIP WIP WIP */
+	}
 #endif
 
 	if (!w_flag) {
