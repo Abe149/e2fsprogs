@@ -1773,138 +1773,148 @@ AC_ARG_ENABLE(
               [          badblocks_crypto_readWrite=yes]
              )
 
-AH_TEMPLATE(
-            [HAVE_OPENSSL_SHA_H],
-            [This should be defined to 1 if and only if the appropriate header was found during configuration.]
-           )
 
-AH_TEMPLATE(
-            [HAVE_OPENSSL_SHA_LIB],
-            [This should be defined to 1 if and only if the appropriate library was found during configuration.]
-           )
 
-AH_TEMPLATE(
-            [HAVE_OPENSSL_SHA_CAN_COMPILE_AND_LINK],
-            [This should be defined to 1 if and only if the appropriate test program could be both compiled _and_ linked during configuration.]
-           )
+if test _$with_OpenSSL = _yes -a _$badblocks_crypto_readWrite = _yes; then
 
-dnl # The next line: _intentionally_ not using "AC_MSG_CHECKING" [for reasons of "cleanliness" of output]
-AC_MSG_NOTICE([About to check whether or not the C compiler can find the OpenSSL SHA header...])
-AC_CHECK_HEADER(
-                [openssl/sha.h],
-                [AC_DEFINE([HAVE_OPENSSL_SHA_H], 1)]
-                [           HAVE_OPENSSL_SHA_H=1],
-                [AC_MSG_WARN([OpenSSL SHAsums library header (i.e. include file) not found.])]
-               )
 
-dnl # The next line: _intentionally_ not using "AC_MSG_CHECKING" [for reasons of "cleanliness" of output]
-AC_MSG_NOTICE([About to check whether or not the linker can find the SHA512 library routine that is expected to be provided by OpenSSL...])
 
-dnl # _intentionally_ not using "AC_SEARCH_LIBS": it adds a match [if found] to the content of the "LIBS" variable, thus adding that library to _all_ executables [and maybe to all libraries?] built by this build.
-AC_CHECK_LIB(
-             [ssl],
-             [SHA512],
-             [AC_MSG_RESULT([SHA512 library routine found.])]
-             [AC_DEFINE([HAVE_OPENSSL_SHA_LIB], 1)]
-             [           HAVE_OPENSSL_SHA_LIB=1],
-             [AC_MSG_WARN([SHA512 library routine not found.])]
-            )
+  AH_TEMPLATE(
+              [HAVE_OPENSSL_SHA_H],
+              [This should be defined to 1 if and only if the appropriate header was found during configuration.]
+             )
 
-### --- with thanks to "brianegge" at <https://stackoverflow.com/questions/918676/generate-sha-hash-in-c-using-openssl-library#919375> --- ###
-AC_MSG_NOTICE([About to check whether or not we can compile _and_ link a program that depends on the SHA512 library routine that is expected to be provided by OpenSSL...])
+  AH_TEMPLATE(
+              [HAVE_OPENSSL_SHA_LIB],
+              [This should be defined to 1 if and only if the appropriate library was found during configuration.]
+             )
 
-LIBS_BACKUP="$LIBS"
-LIBS="$LIBS -lssl"
+  AH_TEMPLATE(
+              [HAVE_OPENSSL_SHA_CAN_COMPILE_AND_LINK],
+              [This should be defined to 1 if and only if the appropriate test program could be both compiled _and_ linked during configuration.]
+             )
 
-AC_LINK_IFELSE(
-               [
-                AC_LANG_PROGRAM(
-                                [[
-                                  #include <openssl/sha.h>
-                                  #include <stdio.h>
-                                  #include <string.h>
-                                ]],
-                                [[
-                                  unsigned char  input_buffer[] = "this is a test of the emergency broadcast system.";
-                                  unsigned char output_buffer[99]; /* should only need 64, but allowing for overflow */
-                                  SHA512(input_buffer, strlen(input_buffer), output_buffer);
-                                ]]
-                               )
-               ]
-               ,
-               [AC_MSG_RESULT([yes])]
-               [AC_DEFINE([HAVE_OPENSSL_SHA_CAN_COMPILE_AND_LINK], 1)]
-               [           HAVE_OPENSSL_SHA_CAN_COMPILE_AND_LINK=1]
-               ,
-               [AC_MSG_RESULT([no])]
-               [AC_MSG_WARN([OpenSSL SHAsums library not found or does not support the "SHA512" routine.])]
+  dnl # The next line: _intentionally_ not using "AC_MSG_CHECKING" [for reasons of "cleanliness" of output]
+  AC_MSG_NOTICE([About to check whether or not the C compiler can find the OpenSSL SHA header...])
+  AC_CHECK_HEADER(
+                  [openssl/sha.h],
+                  [AC_DEFINE([HAVE_OPENSSL_SHA_H], 1)]
+                  [           HAVE_OPENSSL_SHA_H=1],
+                  [AC_MSG_WARN([OpenSSL SHAsums library header (i.e. include file) not found.])]
+                 )
+
+  dnl # The next line: _intentionally_ not using "AC_MSG_CHECKING" [for reasons of "cleanliness" of output]
+  AC_MSG_NOTICE([About to check whether or not the linker can find the SHA512 library routine that is expected to be provided by OpenSSL...])
+
+  dnl # _intentionally_ not using "AC_SEARCH_LIBS": it adds a match [if found] to the content of the "LIBS" variable, thus adding that library to _all_ executables [and maybe to all libraries?] built by this build.
+  AC_CHECK_LIB(
+               [ssl],
+               [SHA512],
+               [AC_MSG_RESULT([SHA512 library routine found.])]
+               [AC_DEFINE([HAVE_OPENSSL_SHA_LIB], 1)]
+               [           HAVE_OPENSSL_SHA_LIB=1],
+               [AC_MSG_WARN([SHA512 library routine not found.])]
               )
 
-LIBS="$LIBS_BACKUP"
+  ### --- with thanks to "brianegge" at <https://stackoverflow.com/questions/918676/generate-sha-hash-in-c-using-openssl-library#919375> --- ###
+  AC_MSG_NOTICE([About to check whether or not we can compile _and_ link a program that depends on the SHA512 library routine that is expected to be provided by OpenSSL...])
 
+  LIBS_BACKUP="$LIBS"
+  LIBS="$LIBS -lssl"
 
-
-# a perhaps-naïve assumption: on all *BSD systems, "arc4random" is available without any extra includes or linked libraries
-# building the crypto-enabled "badblocks" on systems that are neither *BSD nor GNU/Linux is likely to be painful; patches welcome
-
-if test _$HAVE_OPENSSL_SHA_H = _1 -a _$HAVE_OPENSSL_SHA_LIB = _1 -a _$HAVE_OPENSSL_SHA_CAN_COMPILE_AND_LINK = _1; then
-  # re running "uname" etc. on the next non-{comment/blank} line: THIS ALMOST-CERTAINLY BREAKS AT LEAST SOME GNU/Linux-BUILT CROSS BUILDS: the OS of the target is assumed to be the OS of the build host!  patches welcome
-
-  if uname -o | grep -iq GNU || uname -s | grep -iq Linux; then
-    AC_DEFINE(NEED_BSD_PORTABILITY_HEADER_AND_LIB, 1)
-              NEED_BSD_PORTABILITY_HEADER_AND_LIB=1 # thank the gods that we are not in Python-land  ;-)
-
-    dnl # The next line: _intentionally_ not using "AC_MSG_CHECKING" [for reasons of "cleanliness" of output]
-    AC_MSG_NOTICE([About to check whether or not the C compiler can find the BSD portability header...])
-    AC_CHECK_HEADER(
-                    [bsd/stdlib.h],
-                    [AC_MSG_RESULT([BSD portability library header (i.e. include file) found.])]
-                    [AC_DEFINE([HAVE_BSD_PORTABILITY_H], 1)]
-                    [           HAVE_BSD_PORTABILITY_H=1],
-                    [AC_MSG_WARN([BSD portability library header (i.e. include file) not found.])]
-                   )
-
-    dnl # _intentionally_ not using "AC_SEARCH_LIBS": it adds a match [if found] to the content of the "LIBS" variable, thus adding that library to _all_ executables [and maybe to all libraries?] built by this build.
-    AC_CHECK_LIB(
-                 [bsd],
-                 [arc4random_buf],
-                 [AC_MSG_RESULT([arc4random_buf library routine found.])]
-                 [AC_DEFINE([HAVE_BSD_PORTABILITY_LIB], 1)]
-                 [           HAVE_BSD_PORTABILITY_LIB=1],
-                 [AC_MSG_WARN([arc4random_buf library routine not found.])]
+  AC_LINK_IFELSE(
+                 [
+                  AC_LANG_PROGRAM(
+                                  [[
+                                    #include <openssl/sha.h>
+                                    #include <stdio.h>
+                                    #include <string.h>
+                                  ]],
+                                  [[
+                                    unsigned char  input_buffer[] = "this is a test of the emergency broadcast system.";
+                                    unsigned char output_buffer[99]; /* should only need 64, but allowing for overflow */
+                                    SHA512(input_buffer, strlen(input_buffer), output_buffer);
+                                  ]]
+                                 )
+                 ]
+                 ,
+                 [AC_MSG_RESULT([yes])]
+                 [AC_DEFINE([HAVE_OPENSSL_SHA_CAN_COMPILE_AND_LINK], 1)]
+                 [           HAVE_OPENSSL_SHA_CAN_COMPILE_AND_LINK=1]
+                 ,
+                 [AC_MSG_RESULT([no])]
+                 [AC_MSG_WARN([OpenSSL SHAsums library not found or does not support the "SHA512" routine.])]
                 )
-  else
-    AC_DEFINE(NEED_BSD_PORTABILITY_HEADER_AND_LIB, 0)
+
+  LIBS="$LIBS_BACKUP"
+
+
+
+  # a perhaps-naïve assumption: on all *BSD systems, "arc4random" is available without any extra includes or linked libraries
+  # building the crypto-enabled "badblocks" on systems that are neither *BSD nor GNU/Linux is likely to be painful; patches welcome
+
+  if test _$HAVE_OPENSSL_SHA_H = _1 -a _$HAVE_OPENSSL_SHA_LIB = _1 -a _$HAVE_OPENSSL_SHA_CAN_COMPILE_AND_LINK = _1; then
+    # re running "uname" etc. on the next non-{comment/blank} line: THIS ALMOST-CERTAINLY BREAKS AT LEAST SOME GNU/Linux-BUILT CROSS BUILDS: the OS of the target is assumed to be the OS of the build host!  patches welcome
+
+    if uname -o | grep -iq GNU || uname -s | grep -iq Linux; then
+      AC_DEFINE(NEED_BSD_PORTABILITY_HEADER_AND_LIB, 1)
+                NEED_BSD_PORTABILITY_HEADER_AND_LIB=1 # thank the gods that we are not in Python-land  ;-)
+
+      dnl # The next line: _intentionally_ not using "AC_MSG_CHECKING" [for reasons of "cleanliness" of output]
+      AC_MSG_NOTICE([About to check whether or not the C compiler can find the BSD portability header...])
+      AC_CHECK_HEADER(
+                      [bsd/stdlib.h],
+                      [AC_MSG_RESULT([BSD portability library header (i.e. include file) found.])]
+                      [AC_DEFINE([HAVE_BSD_PORTABILITY_H], 1)]
+                      [           HAVE_BSD_PORTABILITY_H=1],
+                      [AC_MSG_WARN([BSD portability library header (i.e. include file) not found.])]
+                     )
+
+      dnl # _intentionally_ not using "AC_SEARCH_LIBS": it adds a match [if found] to the content of the "LIBS" variable, thus adding that library to _all_ executables [and maybe to all libraries?] built by this build.
+      AC_CHECK_LIB(
+                   [bsd],
+                   [arc4random_buf],
+                   [AC_MSG_RESULT([arc4random_buf library routine found.])]
+                   [AC_DEFINE([HAVE_BSD_PORTABILITY_LIB], 1)]
+                   [           HAVE_BSD_PORTABILITY_LIB=1],
+                   [AC_MSG_WARN([arc4random_buf library routine not found.])]
+                  )
+    else
+      AC_DEFINE(NEED_BSD_PORTABILITY_HEADER_AND_LIB, 0)
+    fi
   fi
-fi
 
 
-echo "TESTING: with_OpenSSL                          = ''$with_OpenSSL''"
-echo "TESTING: badblocks_crypto_readWrite            = ''$badblocks_crypto_readWrite''"
-echo "TESTING: HAVE_OPENSSL_SHA_H                    = ''$HAVE_OPENSSL_SHA_H''"
-echo "TESTING: HAVE_OPENSSL_SHA_LIB                  = ''$HAVE_OPENSSL_SHA_LIB''"
-echo "TESTING: HAVE_OPENSSL_SHA_CAN_COMPILE_AND_LINK = ''$HAVE_OPENSSL_SHA_CAN_COMPILE_AND_LINK''"
-echo "TESTING: NEED_BSD_PORTABILITY_HEADER_AND_LIB   = ''$NEED_BSD_PORTABILITY_HEADER_AND_LIB''"
-echo "TESTING: HAVE_BSD_PORTABILITY_H                = ''$HAVE_BSD_PORTABILITY_H''"
-echo "TESTING: HAVE_BSD_PORTABILITY_LIB              = ''$HAVE_BSD_PORTABILITY_LIB''"
+  echo "TESTING: with_OpenSSL                          = ''$with_OpenSSL''"
+  echo "TESTING: badblocks_crypto_readWrite            = ''$badblocks_crypto_readWrite''"
+  echo "TESTING: HAVE_OPENSSL_SHA_H                    = ''$HAVE_OPENSSL_SHA_H''"
+  echo "TESTING: HAVE_OPENSSL_SHA_LIB                  = ''$HAVE_OPENSSL_SHA_LIB''"
+  echo "TESTING: HAVE_OPENSSL_SHA_CAN_COMPILE_AND_LINK = ''$HAVE_OPENSSL_SHA_CAN_COMPILE_AND_LINK''"
+  echo "TESTING: NEED_BSD_PORTABILITY_HEADER_AND_LIB   = ''$NEED_BSD_PORTABILITY_HEADER_AND_LIB''"
+  echo "TESTING: HAVE_BSD_PORTABILITY_H                = ''$HAVE_BSD_PORTABILITY_H''"
+  echo "TESTING: HAVE_BSD_PORTABILITY_LIB              = ''$HAVE_BSD_PORTABILITY_LIB''"
 
-if test _$HAVE_OPENSSL_SHA_H = _1 -a _$HAVE_OPENSSL_SHA_LIB = _1 -a _$HAVE_OPENSSL_SHA_CAN_COMPILE_AND_LINK = _1; then
-  echo -n "Detected that all the requirements for OpenSSL-based crypto-badblocks (''badblocks_with_crypto'') have been met"
-  if   test _$with_OpenSSL != _yes -a _$badblocks_crypto_readWrite != _yes; then
-    echo ", but both ''with_OpenSSL'' & ''badblocks_crypto_readWrite'' seem  to be disabled."
-  elif test _$with_OpenSSL != _yes                                        ; then
-    echo ", but"    "''with_OpenSSL''"                                "seems to be disabled."
-  elif test                           _$badblocks_crypto_readWrite != _yes; then
-    echo ", but"                       "''badblocks_crypto_readWrite'' seems to be disabled."
-  else # pay dirt!  :-)
-    echo . # finish up the earlier "echo -n"
-    AC_SUBST(badblocks_with_crypto_LDFLAGS, ["$LDFLAGS -lssl"])
+  if test _$HAVE_OPENSSL_SHA_H = _1 -a _$HAVE_OPENSSL_SHA_LIB = _1 -a _$HAVE_OPENSSL_SHA_CAN_COMPILE_AND_LINK = _1; then
+    echo -n "Detected that all the requirements for OpenSSL-based crypto-badblocks (''badblocks_with_crypto'') have been met"
+    if   test _$with_OpenSSL != _yes -a _$badblocks_crypto_readWrite != _yes; then
+      echo ", but both ''with_OpenSSL'' & ''badblocks_crypto_readWrite'' seem  to be disabled."
+    elif test _$with_OpenSSL != _yes                                        ; then
+      echo ", but"    "''with_OpenSSL''"                                "seems to be disabled."
+    elif test                           _$badblocks_crypto_readWrite != _yes; then
+      echo ", but"                       "''badblocks_crypto_readWrite'' seems to be disabled."
+    else # pay dirt!  :-)
+      echo . # finish up the earlier "echo -n"
+      AC_SUBST(badblocks_with_crypto_LDFLAGS, ["$LDFLAGS -lssl"])
 
-    AC_SUBST(HAVE_OPENSSL_SHA_H, 1)
-    AC_SUBST(HAVE_OPENSSL_SHA_LIB, 1)
-    AC_SUBST(HAVE_OPENSSL_SHA_CAN_COMPILE_AND_LINK, 1)
+      AC_SUBST(HAVE_OPENSSL_SHA_H, 1)
+      AC_SUBST(HAVE_OPENSSL_SHA_LIB, 1)
+      AC_SUBST(HAVE_OPENSSL_SHA_CAN_COMPILE_AND_LINK, 1)
+    fi
   fi
-fi
+
+
+
+fi # end of "if test _$with_OpenSSL = _yes -a _$badblocks_crypto_readWrite = _yes; then"
 
 dnl # --- ^^^ --- Abe was here --- ^^^ --- #
 
