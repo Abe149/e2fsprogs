@@ -1053,7 +1053,6 @@ static unsigned int test___cryptoBased_readWrite_WITH_postZeroing /* the rest of
 	currently_testing = first_block;
 
 	while (currently_testing < last_block) {
-//		fprintf(stderr, ".");
 		if (currently_testing + number_of_blocks_to_TRY_to_write_in_one_write > last_block)
 			number_of_blocks_to_TRY_to_write_in_one_write = last_block - currently_testing;
 
@@ -1072,9 +1071,8 @@ static unsigned int test___cryptoBased_readWrite_WITH_postZeroing /* the rest of
 	} /* end while */
 
 	if (s_flag | v_flag)  fputs(_(done_string), stderr);
-	flush_bufs();
 
-	/* WIP WIP WIP */
+	flush_bufs();
 
 	if (v_flag > 1)  fprintf(stderr, "\n''test___cryptoBased_readWrite_WITH_postZeroing'' about to return %d\n", to_return);
 
@@ -1092,6 +1090,21 @@ static unsigned int test___cryptoBased_readWrite_withOUT_postZeroing /* the rest
 
 	if (v_flag > 1)  fprintf(stderr, "\n''test___cryptoBased_readWrite_withOUT_postZeroing'' was called.\n");
 	VERBOSE_DEBUG_OUTPUT_FOR_TEST_FUNCTIONS
+
+	flush_bufs();
+
+	if (v_flag) {
+		fprintf(stderr, "Checking for bad blocks in crypto-based read-write mode...\n");
+		fprintf(stderr, "From block %lu to block %lu ...\n", (unsigned long) first_block, (unsigned long) last_block - 1);
+	}
+
+
+
+	/* WIP WIP WIP */
+
+
+
+	flush_bufs();
 
 	if (v_flag > 1)  fprintf(stderr, "\n''test___cryptoBased_readWrite_withOUT_postZeroing'' about to return %d\n", count_of_bad_blocks_found);
 
