@@ -122,7 +122,7 @@ static void exclusive_usage(void)
 	fprintf(stderr,
 		_("%s: The \"-n\""
 #if defined(GREEN_LIGHT_FOR_CRYPTO) && GREEN_LIGHT_FOR_CRYPTO>0
-		", \"-w\", and \"-Z\""
+		", \"-w\", and \"-Z\"/\"-0\""
 #else
 		" and \"-w\""
 #endif
@@ -478,9 +478,12 @@ static int do_write(int dev, unsigned char * buffer, int try, int block_size,
 		com_err (program_name, errno, "%s", _("during seek"));
 
 	/* Try the write */
-	got = write (dev, buffer, try * block_size);
-	if (got < 0)
-		got = 0;
+	got = write(dev, buffer, try * block_size); /* from unistd.h */
+	if (v_flag > 2)  fprintf(stderr, "the real value of ''got'', i.e. before dividing by ''block_size'': %d\n", got);
+
+	if (got < 0)  for (;;); // SPIN FOR DEBUG
+// TEMP. DISABLED:		got = 0;
+
 	if (got & 511)
 		fprintf(stderr, "Weird value (%ld) in do_write\n", got);
 	got /= block_size;
@@ -1239,7 +1242,8 @@ int main (int argc, char ** argv)
 			break;
 		case 'w':
 			if (
-			    w_flag
+			    ( w_flag && (w_flag != 1) )
+			          /* ^^^^^^^^^^^^^^^^ don`t warn for repeated non-conflicting uses of "-w" in a single invocation */
 #if defined(GREEN_LIGHT_FOR_CRYPTO) && GREEN_LIGHT_FOR_CRYPTO>0
 			    || use_cryptoBased_readWrite_test_mode
 #endif
@@ -1250,7 +1254,8 @@ int main (int argc, char ** argv)
 			break;
 		case 'n':
 			if (
-			    w_flag
+			    ( w_flag && (w_flag != 2) )
+			          /* ^^^^^^^^^^^^^^^^ don`t warn for repeated non-conflicting uses of "-w" in a single invocation */
 #if defined(GREEN_LIGHT_FOR_CRYPTO) && GREEN_LIGHT_FOR_CRYPTO>0
 			    || use_cryptoBased_readWrite_test_mode
 #endif
@@ -1320,11 +1325,13 @@ int main (int argc, char ** argv)
 		case 'Z':
 			use_cryptoBased_readWrite_test_mode = 1;
 			printf("\nWIP warning: use_cryptoBased_readWrite_test_mode now = %d, but feature programming not yet complete.\n\n", use_cryptoBased_readWrite_test_mode); /* WIP WIP WIP */
-			if (w_flag)  exclusive_usage();
+			if ( w_flag && (w_flag != 3) )  exclusive_usage();
 
 			/* reason for the condition on the next line: to make "-0Z" mean the same thing as "-Z0"; otherwise, it might be _very_ confusing for the user */
 			if (test_func != test___cryptoBased_readWrite_WITH_postZeroing)
 				test_func = test___cryptoBased_readWrite_withOUT_postZeroing;
+
+			w_flag = 3;
 			break;
 		case '0':
 /* design note: should I/we make "-0" without "-Z' an error, instead of allowing it to mean the same thing as both "-0Z" & "-Z0"? */
@@ -1332,7 +1339,9 @@ int main (int argc, char ** argv)
 			use_cryptoBased_readWrite_test_mode = 1;
 			printf("\nWIP warning: use_cryptoBased_readWrite_test_mode now = %d, but feature programming not yet complete.\n", use_cryptoBased_readWrite_test_mode); /* WIP WIP WIP */
 			printf(  "WIP warning: zero_drive_after_cryptoBased_test now = %d, but feature programming not yet complete.\n\n", zero_drive_after_cryptoBased_test); /* WIP WIP WIP */
+			if ( w_flag && (w_flag != 3) )  exclusive_usage();
 			test_func = test___cryptoBased_readWrite_WITH_postZeroing;
+			w_flag = 3;
 			break;
 #endif
 		default:
@@ -1408,7 +1417,20 @@ int main (int argc, char ** argv)
 		check_mount(device_name);
 
 	gettimeofday(&time_start, 0);
-	open_flag = O_LARGEFILE | (w_flag ? O_RDWR : O_RDONLY);
+
+
+
+	open_flag = O_LARGEFILE | (
+#if defined(GREEN_LIGHT_FOR_CRYPTO) && GREEN_LIGHT_FOR_CRYPTO>0
+					(w_flag || use_cryptoBased_readWrite_test_mode) /* belt and suspenders, to prevent the return of a nasty debug-resistant bug */
+#else
+					w_flag
+#endif
+					? O_RDWR : O_RDONLY
+				  );
+
+
+
 	dev = open (device_name, open_flag);
 	if (dev == -1) {
 		com_err (program_name, errno, _("while trying to open %s"),
