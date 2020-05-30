@@ -678,7 +678,7 @@ static unsigned int test_rw (int dev, blk_t last_block,
 				try = last_block - currently_testing;
 			got = do_write(dev, buffer, try, block_size,
 					currently_testing);
-		fprintf(stderr, "                                             TESTING: got = %d, dev = %d, buffer = %llu, try = %d, block_size = %d, currently_testing = %d ...\n",  got, dev, buffer, try, block_size, currently_testing); // WIP DEBUG
+			if (v_flag > 9)  fprintf(stderr, "                                             TESTING: got = %d, dev = %d, buffer = %llu, try = %d, block_size = %d, currently_testing = %d ...\n",  got, dev, buffer, try, block_size, currently_testing); /* there is a reason for the large run of spaces: interaction [& prevention thereof] with the status output from the "-s" flag */
 			if (v_flag > 1)
 				print_status();
 
@@ -1058,7 +1058,7 @@ static unsigned int test___cryptoBased_readWrite_WITH_postZeroing /* the rest of
 			number_of_blocks_to_TRY_to_write_in_one_write = last_block - currently_testing;
 
 		got = do_write(dev, buffer, number_of_blocks_to_TRY_to_write_in_one_write, block_size, currently_testing);
-		fprintf(stderr, "                                             TESTING: got = %d, dev = %d, buffer = %llu, number_of_blocks_to_TRY_to_write_in_one_write = %d, block_size = %d, currently_testing = %d ...\n",  got, dev, buffer, number_of_blocks_to_TRY_to_write_in_one_write, block_size, currently_testing); // WIP DEBUG
+		if (v_flag > 9)  fprintf(stderr, "                                             TESTING: got = %d, dev = %d, buffer = %llu, number_of_blocks_to_TRY_to_write_in_one_write = %d, block_size = %d, currently_testing = %d ...\n",  got, dev, buffer, number_of_blocks_to_TRY_to_write_in_one_write, block_size, currently_testing); /* there is a reason for the large run of spaces: interaction [& prevention thereof] with the status output from the "-s" flag */
 
 		if (v_flag > 1)  print_status();
 
