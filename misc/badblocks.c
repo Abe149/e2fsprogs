@@ -68,7 +68,21 @@ extern int optind;
 #include "support/nls-enable.h"
 
 /* intentionally being _very_ careful about this */
-#if defined(HAVE_OPENSSL_SHA_H) && (HAVE_OPENSSL_SHA_H>0) && defined(HAVE_OPENSSL_SHA_LIB) && (HAVE_OPENSSL_SHA_LIB>0) && defined(HAVE_OPENSSL_SHA_CAN_COMPILE_AND_LINK) && (HAVE_OPENSSL_SHA_CAN_COMPILE_AND_LINK>0) && ! defined(DISABLE_CRYPTO)
+#if defined(HAVE_OPENSSL_SHA_H                     ) && \
+	   (HAVE_OPENSSL_SHA_H>0                   ) && \
+    defined(HAVE_OPENSSL_SHA_LIB                   ) && \
+	   (HAVE_OPENSSL_SHA_LIB>0                 ) && \
+    defined(HAVE_OPENSSL_SHA_CAN_COMPILE_AND_LINK  ) && \
+	   (HAVE_OPENSSL_SHA_CAN_COMPILE_AND_LINK>0) && \
+    ( ( ( ! defined(NEED_BSD_PORTABILITY_HEADER_AND_LIB) ) || \
+		   (NEED_BSD_PORTABILITY_HEADER_AND_LIB==0) ) || ( defined(HAVE_BSD_PORTABILITY_H                   ) && \
+									  (HAVE_BSD_PORTABILITY_H  >0               ) && \
+								   defined(HAVE_BSD_PORTABILITY_LIB                 ) && \
+									  (HAVE_BSD_PORTABILITY_LIB>0               ) && \
+								   defined(HAVE_BSD_PORTABILITY_CAN_COMPILE_AND_LINK) && \
+									  (HAVE_BSD_PORTABILITY_CAN_COMPILE_AND_LINK>0)  \
+								 ) \
+    ) && ! defined(DISABLE_CRYPTO)
   #include <openssl/sha.h>
   #define GREEN_LIGHT_FOR_CRYPTO 1
 #endif
