@@ -1780,12 +1780,12 @@ AH_TEMPLATE(
 
 AH_TEMPLATE(
             [HAVE_OPENSSL_SHA_LIB],
-            [This should be defined to 1 if and only if the appropriate header was found during configuration.]
+            [This should be defined to 1 if and only if the appropriate library was found during configuration.]
            )
 
 AH_TEMPLATE(
             [HAVE_OPENSSL_SHA_CAN_COMPILE_AND_LINK],
-            [This should be defined to 1 if and only if the appropriate header was found during configuration.]
+            [This should be defined to 1 if and only if the appropriate test program could be both compiled _and_ linked during configuration.]
            )
 
 dnl # The next line: _intentionally_ not using "AC_MSG_CHECKING" [for reasons of "cleanliness" of output]
