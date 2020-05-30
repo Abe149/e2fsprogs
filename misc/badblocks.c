@@ -1015,10 +1015,12 @@ static unsigned int test_nd (int dev, blk_t last_block,
 
 
 
-
 /* the next line: DRY principle; a macro for convenient/easy/quick-at-runTime access to local variables */
 #define VERBOSE_DEBUG_OUTPUT_FOR_TEST_FUNCTIONS  if (v_flag)  fprintf(stderr, "\ndev = %d, last_block = %lu, block_size = %d, first_block = %lu, blocks_at_once = %u\n", dev, last_block, block_size, first_block, blocks_at_once);
 
+
+
+#if defined(GREEN_LIGHT_FOR_CRYPTO) && GREEN_LIGHT_FOR_CRYPTO>0
 
 
 
@@ -1051,8 +1053,6 @@ static unsigned int test___cryptoBased_readWrite_withOUT_postZeroing /* the rest
 
 	return count_of_bad_blocks_found;
 }
-
-
 
 
 
@@ -1116,8 +1116,7 @@ static unsigned int test___cryptoBased_readWrite_WITH_postZeroing /* the rest of
 
 
 
-
-
+#endif
 
 
 
