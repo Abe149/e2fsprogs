@@ -83,6 +83,7 @@ extern int optind;
 									  (HAVE_BSD_PORTABILITY_CAN_COMPILE_AND_LINK>0)  \
 								 ) \
     ) && ! defined(DISABLE_CRYPTO)
+  #include  <bsd/stdlib.h>
   #include <openssl/sha.h>
   #define GREEN_LIGHT_FOR_CRYPTO 1
 #endif
