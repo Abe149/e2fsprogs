@@ -1061,7 +1061,10 @@ static unsigned int test___cryptoBased_readWrite_withOUT_postZeroing /* the rest
 		exit(1);
 	}
 
-
+/* magic number 64: 512 bits ÷ 8 bits per byte ⇒ 64 bytes for an SHA512 sum */
+#if SHA512_DIGEST_LENGTH != 64
+  #error "Something terribly unexpected happened with regards to the library providing SHA512 functionality."
+#endif
 
 	/* --- vvv --- WIP WIP WIP --- vvv --- */
 
@@ -1074,7 +1077,13 @@ static unsigned int test___cryptoBased_readWrite_withOUT_postZeroing /* the rest
 		if (currently_testing + number_of_blocks_to_TRY_to_write_in_one_write > last_block)
 			number_of_blocks_to_TRY_to_write_in_one_write = last_block - currently_testing;
 
-		arc4random_buf(buffer, number_of_blocks_to_TRY_to_write_in_one_write * block_size); /* WIP WIP WIP */
+		/* const? */ unsigned long number_of_bytes_to_randomize = (number_of_blocks_to_TRY_to_write_in_one_write * block_size) - SHA512_DIGEST_LENGTH;
+
+		arc4random_buf(buffer, number_of_bytes_to_randomize); /* secret sauce part 1 of 2 */
+
+		/* secret sauce part 2 of 2 */
+		SHA512(        buffer,  number_of_bytes_to_randomize,
+			       buffer + number_of_bytes_to_randomize);
 
 		got = do_write(dev, buffer, number_of_blocks_to_TRY_to_write_in_one_write, block_size, currently_testing);
 		if (v_flag > 9)  fprintf(stderr, "                                             TESTING: got = %d, dev = %d, buffer = %llu, number_of_blocks_to_TRY_to_write_in_one_write = %d, block_size = %d, currently_testing = %d ...\n",  got, dev, buffer, number_of_blocks_to_TRY_to_write_in_one_write, block_size, currently_testing); /* there is a reason for the large run of spaces: interaction [& prevention thereof] with the status output from the "-s" flag */
