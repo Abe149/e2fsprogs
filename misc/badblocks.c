@@ -221,7 +221,7 @@ static int bb_output (blk_t bad, enum error_types error_type)
 static char *time_diff_format(struct timeval *tv1,
 			      struct timeval *tv2, char *buf)
 {
-        time_t	diff = (tv1->tv_sec - tv2->tv_sec);
+	time_t	diff = (tv1->tv_sec - tv2->tv_sec);
 	int	hr,min,sec;
 
 	sec = diff % 60;
@@ -259,8 +259,7 @@ static void print_status(void)
 
 	gettimeofday(&time_end, 0);
 	len = snprintf(line_buf, sizeof(line_buf), 
-		       _("%6.2f%% done, %s elapsed. "
-		         "(%d/%d/%d errors)"),
+		       _("%6.2f%% done, %s elapsed. (%d/%d/%d errors)"),
 		       calc_percent((unsigned long) currently_testing,
 				    (unsigned long) num_blocks), 
 		       time_diff_format(&time_end, &time_start, diff_buf),
@@ -1274,7 +1273,7 @@ int main (int argc, char ** argv)
 		case 'w':
 			if (
 			    ( w_flag && (w_flag != 1) )
-			          /* ^^^^^^^^^^^^^^^^ don`t warn for repeated non-conflicting uses of "-w" in a single invocation */
+				  /* ^^^^^^^^^^^^^^^^ don`t warn for repeated non-conflicting uses of "-w" in a single invocation */
 #if defined(GREEN_LIGHT_FOR_CRYPTO) && GREEN_LIGHT_FOR_CRYPTO>0
 			    || use_cryptoBased_readWrite_test_mode
 #endif
@@ -1286,7 +1285,7 @@ int main (int argc, char ** argv)
 		case 'n':
 			if (
 			    ( w_flag && (w_flag != 2) )
-			          /* ^^^^^^^^^^^^^^^^ don`t warn for repeated non-conflicting uses of "-w" in a single invocation */
+				  /* ^^^^^^^^^^^^^^^^ don`t warn for repeated non-conflicting uses of "-w" in a single invocation */
 #if defined(GREEN_LIGHT_FOR_CRYPTO) && GREEN_LIGHT_FOR_CRYPTO>0
 			    || use_cryptoBased_readWrite_test_mode
 #endif
