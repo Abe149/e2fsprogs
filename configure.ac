@@ -1781,7 +1781,7 @@ if test _$with_OpenSSL = _yes -a _$badblocks_crypto_readWrite = _yes; then
 
   AH_TEMPLATE(
               [HAVE_OPENSSL_SHA_H],
-              [This should be defined to 1 if and only if the appropriate header was found during configuration.]
+              [This should be defined to 1 if and only if the appropriate header  was found during configuration.]
              )
 
   AH_TEMPLATE(
@@ -1794,13 +1794,29 @@ if test _$with_OpenSSL = _yes -a _$badblocks_crypto_readWrite = _yes; then
               [This should be defined to 1 if and only if the appropriate test program could be both compiled _and_ linked during configuration.]
              )
 
+  AH_TEMPLATE(
+              [NEED_BSD_PORTABILITY_HEADER_AND_LIB],
+              [This should be defined to 1 if and only if the appropriate header and library were judged as being needed during configuration.]
+             )
+
+  AH_TEMPLATE(
+              [HAVE_BSD_PORTABILITY_H],
+              [This should be defined to 1 if and only if the appropriate header  was found during configuration.]
+             )
+
+  AH_TEMPLATE(
+              [HAVE_BSD_PORTABILITY_LIB],
+              [This should be defined to 1 if and only if the appropriate library was found during configuration.]
+             )
+
   dnl # The next line: _intentionally_ not using "AC_MSG_CHECKING" [for reasons of "cleanliness" of output]
   AC_MSG_NOTICE([About to check whether or not the C compiler can find the OpenSSL SHA header...])
   AC_CHECK_HEADER(
                   [openssl/sha.h],
+                  [AC_MSG_RESULT([OpenSSL SHAsums library header (i.e. include file)     found.])]
                   [AC_DEFINE([HAVE_OPENSSL_SHA_H], 1)]
                   [           HAVE_OPENSSL_SHA_H=1],
-                  [AC_MSG_WARN([OpenSSL SHAsums library header (i.e. include file) not found.])]
+                  [AC_MSG_WARN(  [OpenSSL SHAsums library header (i.e. include file) not found.])]
                  )
 
   dnl # The next line: _intentionally_ not using "AC_MSG_CHECKING" [for reasons of "cleanliness" of output]
@@ -1810,10 +1826,10 @@ if test _$with_OpenSSL = _yes -a _$badblocks_crypto_readWrite = _yes; then
   AC_CHECK_LIB(
                [ssl],
                [SHA512],
-               [AC_MSG_RESULT([SHA512 library routine found.])]
+               [AC_MSG_RESULT([SHA512 library routine     found.])]
                [AC_DEFINE([HAVE_OPENSSL_SHA_LIB], 1)]
                [           HAVE_OPENSSL_SHA_LIB=1],
-               [AC_MSG_WARN([SHA512 library routine not found.])]
+               [AC_MSG_WARN(  [SHA512 library routine not found.])]
               )
 
   ### --- with thanks to "brianegge" at <https://stackoverflow.com/questions/918676/generate-sha-hash-in-c-using-openssl-library#919375> --- ###
@@ -1860,24 +1876,26 @@ if test _$with_OpenSSL = _yes -a _$badblocks_crypto_readWrite = _yes; then
       AC_DEFINE(NEED_BSD_PORTABILITY_HEADER_AND_LIB, 1)
                 NEED_BSD_PORTABILITY_HEADER_AND_LIB=1 # thank the gods that we are not in Python-land  ;-)
 
+      AC_SUBST(ADDL_LIBS_FOR_BADBLOCKS_WITH_CRYPTO, [-lbsd])
+
       dnl # The next line: _intentionally_ not using "AC_MSG_CHECKING" [for reasons of "cleanliness" of output]
       AC_MSG_NOTICE([About to check whether or not the C compiler can find the BSD portability header...])
       AC_CHECK_HEADER(
                       [bsd/stdlib.h],
-                      [AC_MSG_RESULT([BSD portability library header (i.e. include file) found.])]
+                      [AC_MSG_RESULT([BSD portability library header (i.e. include file)     found.])]
                       [AC_DEFINE([HAVE_BSD_PORTABILITY_H], 1)]
                       [           HAVE_BSD_PORTABILITY_H=1],
-                      [AC_MSG_WARN([BSD portability library header (i.e. include file) not found.])]
+                      [AC_MSG_WARN(  [BSD portability library header (i.e. include file) not found.])]
                      )
 
       dnl # _intentionally_ not using "AC_SEARCH_LIBS": it adds a match [if found] to the content of the "LIBS" variable, thus adding that library to _all_ executables [and maybe to all libraries?] built by this build.
       AC_CHECK_LIB(
                    [bsd],
                    [arc4random_buf],
-                   [AC_MSG_RESULT([arc4random_buf library routine found.])]
+                   [AC_MSG_RESULT([arc4random_buf library routine     found.])]
                    [AC_DEFINE([HAVE_BSD_PORTABILITY_LIB], 1)]
                    [           HAVE_BSD_PORTABILITY_LIB=1],
-                   [AC_MSG_WARN([arc4random_buf library routine not found.])]
+                   [AC_MSG_WARN(  [arc4random_buf library routine not found.])]
                   )
     else
       AC_DEFINE(NEED_BSD_PORTABILITY_HEADER_AND_LIB, 0)
@@ -1894,27 +1912,41 @@ if test _$with_OpenSSL = _yes -a _$badblocks_crypto_readWrite = _yes; then
   echo "TESTING: HAVE_BSD_PORTABILITY_H                = ''$HAVE_BSD_PORTABILITY_H''"
   echo "TESTING: HAVE_BSD_PORTABILITY_LIB              = ''$HAVE_BSD_PORTABILITY_LIB''"
 
-  if test _$HAVE_OPENSSL_SHA_H = _1 -a _$HAVE_OPENSSL_SHA_LIB = _1 -a _$HAVE_OPENSSL_SHA_CAN_COMPILE_AND_LINK = _1; then
-    echo -n "Detected that all the requirements for OpenSSL-based crypto-badblocks (''badblocks_with_crypto'') have been met"
-    if   test _$with_OpenSSL != _yes -a _$badblocks_crypto_readWrite != _yes; then
-      echo ", but both ''with_OpenSSL'' & ''badblocks_crypto_readWrite'' seem  to be disabled."
-    elif test _$with_OpenSSL != _yes                                        ; then
-      echo ", but"    "''with_OpenSSL''"                                "seems to be disabled."
-    elif test                           _$badblocks_crypto_readWrite != _yes; then
-      echo ", but"                       "''badblocks_crypto_readWrite'' seems to be disabled."
-    else # pay dirt!  :-)
-      echo . # finish up the earlier "echo -n"
-      AC_SUBST(badblocks_with_crypto_LDFLAGS, ["$LDFLAGS -lssl"])
+  if test _$HAVE_OPENSSL_SHA_H = _1 -a _$HAVE_OPENSSL_SHA_LIB = _1 -a _$HAVE_OPENSSL_SHA_CAN_COMPILE_AND_LINK = _1 -a \( \( -z "$NEED_BSD_PORTABILITY_HEADER_AND_LIB" -o $NEED_BSD_PORTABILITY_HEADER_AND_LIB -lt 1 \) -o \( _$HAVE_BSD_PORTABILITY_H = _1 -a _$HAVE_BSD_PORTABILITY_LIB = _1 \) \) ; then
+    echo 'Detected that all the requirements for OpenSSL-based crypto-badblocks ("badblocks_with_crypto") have been met.'
+
+dnl # entirely-commented-out "dnl" lines in the rest of this block of code: stuff that might be too much "belt and suspenders" now that we are checking for the presence of both of the input flags before even _trying_ to _check_ for the crypto. prereq.s
+
+dnl #     echo -n "Detected that all the requirements for OpenSSL-based crypto-badblocks (''badblocks_with_crypto'') have been met"
+dnl #     if   test _$with_OpenSSL != _yes -a _$badblocks_crypto_readWrite != _yes; then
+dnl #       echo ", but both ''with_OpenSSL'' & ''badblocks_crypto_readWrite'' seem  to be disabled."
+dnl #     elif test _$with_OpenSSL != _yes                                        ; then
+dnl #       echo ", but"    "''with_OpenSSL''"                                "seems to be disabled."
+dnl #     elif test                           _$badblocks_crypto_readWrite != _yes; then
+dnl #       echo ", but"                       "''badblocks_crypto_readWrite'' seems to be disabled."
+dnl #     else # pay dirt!  :-)
+dnl #       echo . # finish up the earlier "echo -n"
+      AC_SUBST(badblocks_with_crypto_LDFLAGS, ["$LDFLAGS -lssl -lbsd"])
+      AC_SUBST(badblocks_with_crypto___IF_IT_IS_TO_BE_BUILT___OTHERWISE_EMPTY, badblocks_with_crypto)
 
       AC_SUBST(HAVE_OPENSSL_SHA_H, 1)
       AC_SUBST(HAVE_OPENSSL_SHA_LIB, 1)
       AC_SUBST(HAVE_OPENSSL_SHA_CAN_COMPILE_AND_LINK, 1)
-    fi
+      AC_SUBST(NEED_BSD_PORTABILITY_HEADER_AND_LIB, 1)
+      AC_SUBST(HAVE_BSD_PORTABILITY_H, 1)
+      AC_SUBST(HAVE_BSD_PORTABILITY_LIB, 1)
+dnl #     fi
+  else
+      AC_SUBST(badblocks_with_crypto___IF_IT_IS_TO_BE_BUILT___OTHERWISE_EMPTY, [])
+               badblocks_with_crypto___IF_IT_IS_TO_BE_BUILT___OTHERWISE_EMPTY=
   fi
 
+else
+  AC_SUBST(    badblocks_with_crypto___IF_IT_IS_TO_BE_BUILT___OTHERWISE_EMPTY, [])
+               badblocks_with_crypto___IF_IT_IS_TO_BE_BUILT___OTHERWISE_EMPTY=
+fi dnl # end of "if test _$with_OpenSSL = _yes -a _$badblocks_crypto_readWrite = _yes; then"
 
 
-fi # end of "if test _$with_OpenSSL = _yes -a _$badblocks_crypto_readWrite = _yes; then"
 
 dnl # --- ^^^ --- Abe was here --- ^^^ --- #
 
