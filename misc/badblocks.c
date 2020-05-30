@@ -1055,9 +1055,44 @@ static unsigned int test___cryptoBased_readWrite_withOUT_postZeroing /* the rest
 		fprintf(stderr, "From block %lu to block %lu ...\n", (unsigned long) first_block, (unsigned long) last_block - 1);
 	}
 
+	unsigned char * /* maybe to add here: const */ buffer = allocate_buffer(2 * blocks_at_once * block_size);
+	if (! buffer) {
+		com_err(program_name, ENOMEM, "%s", _("while allocating buffers"));
+		exit(1);
+	}
 
 
-	/* WIP WIP WIP */
+
+	/* --- vvv --- WIP WIP WIP --- vvv --- */
+
+	num_blocks = last_block - 1; /* cargo-cult copy+paste */
+
+	int number_of_blocks_to_TRY_to_write_in_one_write = blocks_at_once, got;
+	currently_testing = first_block;
+
+	while (currently_testing < last_block) {
+		if (currently_testing + number_of_blocks_to_TRY_to_write_in_one_write > last_block)
+			number_of_blocks_to_TRY_to_write_in_one_write = last_block - currently_testing;
+
+		arc4random_buf(buffer, number_of_blocks_to_TRY_to_write_in_one_write * block_size); /* WIP WIP WIP */
+
+		got = do_write(dev, buffer, number_of_blocks_to_TRY_to_write_in_one_write, block_size, currently_testing);
+		if (v_flag > 9)  fprintf(stderr, "                                             TESTING: got = %d, dev = %d, buffer = %llu, number_of_blocks_to_TRY_to_write_in_one_write = %d, block_size = %d, currently_testing = %d ...\n",  got, dev, buffer, number_of_blocks_to_TRY_to_write_in_one_write, block_size, currently_testing); /* there is a reason for the large run of spaces: interaction [& prevention thereof] with the status output from the "-s" flag */
+
+		if (v_flag > 1)  print_status();
+
+		if (got < 1)  exit(-1);
+
+		currently_testing += got;
+		if (got != number_of_blocks_to_TRY_to_write_in_one_write) {
+			number_of_blocks_to_TRY_to_write_in_one_write = 1;
+			continue;
+		}
+	} /* end while */
+
+	if (s_flag | v_flag)  fputs(_(done_string), stderr);
+
+	/* --- ^^^ --- WIP WIP WIP --- ^^^ --- */
 
 
 
@@ -1085,7 +1120,7 @@ static unsigned int test___cryptoBased_readWrite_WITH_postZeroing /* the rest of
 	/* --- zero the file/device/drive; intentionally doing this similarly to pre-existing code in "test_rw" --- */
 
 	unsigned char * /* maybe to add here: const */ buffer = allocate_buffer(2 * blocks_at_once * block_size);
-	if (!buffer) {
+	if (! buffer) {
 		com_err(program_name, ENOMEM, "%s", _("while allocating buffers"));
 		exit(1);
 	}
