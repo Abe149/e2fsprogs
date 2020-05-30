@@ -82,6 +82,18 @@
 /* Define to 1 if blkid has blkid_probe_get_topology */
 #undef HAVE_BLKID_PROBE_GET_TOPOLOGY
 
+/* This should be defined to 1 if and only if the appropriate test program
+   could be both compiled _and_ linked during configuration. */
+#undef HAVE_BSD_PORTABILITY_CAN_COMPILE_AND_LINK
+
+/* This should be defined to 1 if and only if the appropriate header was found
+   during configuration. */
+#undef HAVE_BSD_PORTABILITY_H
+
+/* This should be defined to 1 if and only if the appropriate library was
+   found during configuration. */
+#undef HAVE_BSD_PORTABILITY_LIB
+
 /* Define to 1 if the compiler understands __builtin_expect. */
 #undef HAVE_BUILTIN_EXPECT
 
@@ -656,6 +668,10 @@
 
 /* Define if integer division by zero raises signal SIGFPE. */
 #undef INTDIV0_RAISES_SIGFPE
+
+/* This should be defined to 1 if and only if the appropriate header and
+   library were judged as being needed during configuration. */
+#undef NEED_BSD_PORTABILITY_HEADER_AND_LIB
 
 /* package name for gettext */
 #undef PACKAGE

@@ -14795,8 +14795,8 @@ $as_echo "yes" >&6; }
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
-                 { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: OpenSSL SHAsums library not found or does not support the \"SHA512\" routine." >&5
-$as_echo "$as_me: WARNING: OpenSSL SHAsums library not found or does not support the \"SHA512\" routine." >&2;}
+                 { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: With a test program that requires \"SHA512(const unsigned char *, size_t, unsigned char *)\": failed either to compile with <openssl/sha.h>, to link with \"libssl\" (probably \"libssl.so\"), or both." >&5
+$as_echo "$as_me: WARNING: With a test program that requires \"SHA512(const unsigned char *, size_t, unsigned char *)\": failed either to compile with <openssl/sha.h>, to link with \"libssl\" (probably \"libssl.so\"), or both." >&2;}
 
 fi
 rm -f core conftest.err conftest.$ac_objext \
@@ -14809,26 +14809,25 @@ rm -f core conftest.err conftest.$ac_objext \
   # a perhaps-naïve assumption: on all *BSD systems, "arc4random" is available without any extra includes or linked libraries
   # building the crypto-enabled "badblocks" on systems that are neither *BSD nor GNU/Linux is likely to be painful; patches welcome
 
-  if test _$HAVE_OPENSSL_SHA_H = _1 -a _$HAVE_OPENSSL_SHA_LIB = _1 -a _$HAVE_OPENSSL_SHA_CAN_COMPILE_AND_LINK = _1; then
-    # re running "uname" etc. on the next non-{comment/blank} line: THIS ALMOST-CERTAINLY BREAKS AT LEAST SOME GNU/Linux-BUILT CROSS BUILDS: the OS of the target is assumed to be the OS of the build host!  patches welcome
+    # re running "uname" etc. on the next non-{comment/blank} line: cross-building a/the {crypto-badblocks}-enabled build from a GNU/Linux host to a non-{GNU/Linux} target _and_ vice-versa are _both_ almost-certainly BROKEN: the OS of the target is assumed to be either "the same as" or at least "close enough to" the OS of the build host!  patches welcome
 
-    if uname -o | grep -iq GNU || uname -s | grep -iq Linux; then
-      $as_echo "#define NEED_BSD_PORTABILITY_HEADER_AND_LIB 1" >>confdefs.h
+  if uname -o | grep -iq GNU || uname -s | grep -iq Linux; then
+    $as_echo "#define NEED_BSD_PORTABILITY_HEADER_AND_LIB 1" >>confdefs.h
 
-                NEED_BSD_PORTABILITY_HEADER_AND_LIB=1 # thank the gods that we are not in Python-land  ;-)
+              NEED_BSD_PORTABILITY_HEADER_AND_LIB=1 # thank the gods that we are not in Python-land  ;-)
 
-      ADDL_LIBS_FOR_BADBLOCKS_WITH_CRYPTO=-lbsd
+    ADDL_LIBS_FOR_BADBLOCKS_WITH_CRYPTO=-lbsd
 
 
-            { $as_echo "$as_me:${as_lineno-$LINENO}: About to check whether or not the C compiler can find the BSD portability header..." >&5
+        { $as_echo "$as_me:${as_lineno-$LINENO}: About to check whether or not the C compiler can find the BSD portability header..." >&5
 $as_echo "$as_me: About to check whether or not the C compiler can find the BSD portability header..." >&6;}
-      ac_fn_c_check_header_mongrel "$LINENO" "bsd/stdlib.h" "ac_cv_header_bsd_stdlib_h" "$ac_includes_default"
+    ac_fn_c_check_header_mongrel "$LINENO" "bsd/stdlib.h" "ac_cv_header_bsd_stdlib_h" "$ac_includes_default"
 if test "x$ac_cv_header_bsd_stdlib_h" = xyes; then :
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: BSD portability library header (i.e. include file)     found." >&5
 $as_echo "BSD portability library header (i.e. include file)     found." >&6; }
-                      $as_echo "#define HAVE_BSD_PORTABILITY_H 1" >>confdefs.h
+                    $as_echo "#define HAVE_BSD_PORTABILITY_H 1" >>confdefs.h
 
-                                 HAVE_BSD_PORTABILITY_H=1
+                               HAVE_BSD_PORTABILITY_H=1
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: BSD portability library header (i.e. include file) not found." >&5
 $as_echo "$as_me: WARNING: BSD portability library header (i.e. include file) not found." >&2;}
@@ -14837,7 +14836,7 @@ fi
 
 
 
-            { $as_echo "$as_me:${as_lineno-$LINENO}: checking for arc4random_buf in -lbsd" >&5
+        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for arc4random_buf in -lbsd" >&5
 $as_echo_n "checking for arc4random_buf in -lbsd... " >&6; }
 if ${ac_cv_lib_bsd_arc4random_buf+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -14876,30 +14875,81 @@ $as_echo "$ac_cv_lib_bsd_arc4random_buf" >&6; }
 if test "x$ac_cv_lib_bsd_arc4random_buf" = xyes; then :
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: arc4random_buf library routine     found." >&5
 $as_echo "arc4random_buf library routine     found." >&6; }
-                   $as_echo "#define HAVE_BSD_PORTABILITY_LIB 1" >>confdefs.h
+                 $as_echo "#define HAVE_BSD_PORTABILITY_LIB 1" >>confdefs.h
 
-                              HAVE_BSD_PORTABILITY_LIB=1
+                            HAVE_BSD_PORTABILITY_LIB=1
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: arc4random_buf library routine not found." >&5
 $as_echo "$as_me: WARNING: arc4random_buf library routine not found." >&2;}
 
 fi
 
-    else
-      $as_echo "#define NEED_BSD_PORTABILITY_HEADER_AND_LIB 0" >>confdefs.h
 
-    fi
+    { $as_echo "$as_me:${as_lineno-$LINENO}: About to check whether or not we can compile _and_ link a program that depends on the ARC4 library routine that is expected to be provided by libBSD..." >&5
+$as_echo "$as_me: About to check whether or not we can compile _and_ link a program that depends on the ARC4 library routine that is expected to be provided by libBSD..." >&6;}
+
+    LIBS_BACKUP="$LIBS"
+    LIBS="$LIBS -lbsd"
+
+    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+
+                                      #include <bsd/stdlib.h>
+                                      #include <stdio.h>
+                                      #include <string.h>
+
+int
+main ()
+{
+
+                                      unsigned char  buffer[ 99];
+                                      arc4random_buf(buffer, 99);
+
+
+  ;
+  return 0;
+}
+
+
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+                   $as_echo "#define HAVE_BSD_PORTABILITY_CAN_COMPILE_AND_LINK 1" >>confdefs.h
+
+                              HAVE_BSD_PORTABILITY_CAN_COMPILE_AND_LINK=1
+
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+                   { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: With a test program that requires \"arc4random_buf(void *, size_t)\": failed either to compile with \"bsd/stdlib.h\", to link with \"libbsd\" (probably \"libbsd.so\"), or both." >&5
+$as_echo "$as_me: WARNING: With a test program that requires \"arc4random_buf(void *, size_t)\": failed either to compile with \"bsd/stdlib.h\", to link with \"libbsd\" (probably \"libbsd.so\"), or both." >&2;}
+
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+
+    LIBS="$LIBS_BACKUP"
+
+
+
+
+  else
+    $as_echo "#define NEED_BSD_PORTABILITY_HEADER_AND_LIB 0" >>confdefs.h
+
   fi
 
 
-  echo "TESTING: with_OpenSSL                          = ''$with_OpenSSL''"
-  echo "TESTING: badblocks_crypto_readWrite            = ''$badblocks_crypto_readWrite''"
-  echo "TESTING: HAVE_OPENSSL_SHA_H                    = ''$HAVE_OPENSSL_SHA_H''"
-  echo "TESTING: HAVE_OPENSSL_SHA_LIB                  = ''$HAVE_OPENSSL_SHA_LIB''"
-  echo "TESTING: HAVE_OPENSSL_SHA_CAN_COMPILE_AND_LINK = ''$HAVE_OPENSSL_SHA_CAN_COMPILE_AND_LINK''"
-  echo "TESTING: NEED_BSD_PORTABILITY_HEADER_AND_LIB   = ''$NEED_BSD_PORTABILITY_HEADER_AND_LIB''"
-  echo "TESTING: HAVE_BSD_PORTABILITY_H                = ''$HAVE_BSD_PORTABILITY_H''"
-  echo "TESTING: HAVE_BSD_PORTABILITY_LIB              = ''$HAVE_BSD_PORTABILITY_LIB''"
+  echo "TESTING: with_OpenSSL                              = ''$with_OpenSSL''"
+  echo "TESTING: badblocks_crypto_readWrite                = ''$badblocks_crypto_readWrite''"
+  echo "TESTING: HAVE_OPENSSL_SHA_H                        = ''$HAVE_OPENSSL_SHA_H''"
+  echo "TESTING: HAVE_OPENSSL_SHA_LIB                      = ''$HAVE_OPENSSL_SHA_LIB''"
+  echo "TESTING: HAVE_OPENSSL_SHA_CAN_COMPILE_AND_LINK     = ''$HAVE_OPENSSL_SHA_CAN_COMPILE_AND_LINK''"
+  echo "TESTING: NEED_BSD_PORTABILITY_HEADER_AND_LIB       = ''$NEED_BSD_PORTABILITY_HEADER_AND_LIB''"
+  echo "TESTING: HAVE_BSD_PORTABILITY_H                    = ''$HAVE_BSD_PORTABILITY_H''"
+  echo "TESTING: HAVE_BSD_PORTABILITY_LIB                  = ''$HAVE_BSD_PORTABILITY_LIB''"
+  echo "TESTING: HAVE_BSD_PORTABILITY_CAN_COMPILE_AND_LINK = ''$HAVE_BSD_PORTABILITY_CAN_COMPILE_AND_LINK''"
 
   if test _$HAVE_OPENSSL_SHA_H = _1 -a _$HAVE_OPENSSL_SHA_LIB = _1 -a _$HAVE_OPENSSL_SHA_CAN_COMPILE_AND_LINK = _1 -a \( \( -z "$NEED_BSD_PORTABILITY_HEADER_AND_LIB" -o $NEED_BSD_PORTABILITY_HEADER_AND_LIB -lt 1 \) -o \( _$HAVE_BSD_PORTABILITY_H = _1 -a _$HAVE_BSD_PORTABILITY_LIB = _1 \) \) ; then
     echo 'Detected that all the requirements for OpenSSL-based crypto-badblocks ("badblocks_with_crypto") have been met.'
