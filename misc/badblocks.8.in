@@ -45,9 +45,52 @@ badblocks \- search a device for bad blocks
 ] [
 .I first_block
 ]
+
+.B badblocks_with_crypto
+[
+.B \-svwnfBXZ0
+]
+[
+.B \-b
+.I block_size
+]
+[
+.B \-c
+.I blocks_at_once
+]
+[
+.B \-d
+.I read_delay_factor
+]
+[
+.B \-e
+.I max_bad_blocks
+]
+[
+.B \-i
+.I input_file
+]
+[
+.B \-o
+.I output_file
+]
+[
+.B \-p
+.I num_passes
+]
+[
+.B \-t
+.I test_pattern
+]
+.I device
+[
+.I last_block
+] [
+.I first_block
+]
 .SH DESCRIPTION
 .B badblocks
-is used to search for bad blocks on a device (usually a disk partition).
+is used to search for bad blocks on a device (usually a disk or a partition).
 .I device
 is the special file corresponding to the device (e.g
 .IR /dev/hdc1 ).
@@ -56,8 +99,8 @@ is the last block to be checked; if it is not specified, the last block
 on the device is used as a default.
 .I first_block
 is an optional parameter specifying the starting block number
-for the test, which allows the testing to start in the middle of the
-disk.  If it is not specified the first block on the disk is used as a default.
+for the test, which allows the testing to start elsewhere than at the very start of the
+device.  If it is not specified, the first block on the device is used as a default.
 .PP
 .B Important note:
 If the output of
@@ -74,7 +117,11 @@ users
 .B not
 run
 .B badblocks
-directly, but rather use the
+directly and then try to feed its output into either
+.B e2fsck
+or
+.B mke2fs,
+but rather use the
 .B \-c
 option of the
 .B e2fsck
@@ -134,8 +181,10 @@ an existing filesystem, in a format suitable for use with this option.
 .B \-n
 Use non-destructive read-write mode.  By default only a non-destructive
 read-only test is done.  This option must not be combined with the
-.B \-w
-option, as they are mutually exclusive.
+.B \-w, \-Z,
+or
+.B -0
+options, as they are all mutually exclusive.
 .TP
 .BI \-o " output_file"
 Write the list of bad blocks to the specified file.  Without this option,
@@ -193,8 +242,10 @@ Use write-mode test. With this option,
 scans for bad blocks by writing some patterns (0xaa, 0x55, 0xff, 0x00) on
 every block of the device, reading every block and comparing the contents.
 This option may not be combined with the
-.B \-n
-option, as they are mutually exclusive.
+.B \-n, \-Z,
+or
+.B -0
+options, as they are all mutually exclusive.
 .TP
 .B \-B
 Use buffered I/O and do not use Direct I/O, even if it is available.
@@ -205,12 +256,64 @@ Internal flag only to be used by
 and
 .BR mke2fs (8).
 It bypasses the exclusive mode in-use device safety check.
+.TP
+.B \-Z
+Use (destructive) crypto-enabled read-write test mode.
+Only available in
+.B badblocks_with_crypto.
+This mode only needs two complete passes over the device for a reliable, trustworthy test.
+(The \-w test needs eight passes, but it also zeros the device when done.  Please see
+.B \-0,
+below, for an option to zero the device when using this ("\-Z") option.)
+This option may not be combined with the
+.B \-n
+or
+.B -w
+options, as they are all mutually exclusive.
+This option may be combined with the \-0 option in any order for the same effect,
+i.e.
+.B -Z0
+and
+.B -0Z
+are equivalent by design.
+.TP
+.B \-0
+Zero out the device after a crypto-enabled read-write test mode.
+Only available in
+.B badblocks_with_crypto.
+This option causes the program to fill the device with zeros after testing is complete.
+Thus, the program in -Z mode with the -0 option only needs three complete passes over the device in order to perform a reliable, trustworthy test
+.I and
+zero the device when testing is complete.
+(The \-w test needs eight passes.)
+This option may not be combined with the
+.B \-n
+or
+.B -w
+options, as they are all mutually exclusive.
+\n
+As of this writing, the -0 option implies the -Z option;
+this is not guaranteed to remain so in the future.
+If/when e.g. writing a script that calls "badblocks_with_crypto"
+and intending to use the crypto-based testing mode
+.B with
+post-test device zeroing, please use
+.B both
+the "\-Z" option
+.B and
+the "\-0" option in any order you please.
+(The ordering of "\-Z" relative to "\-0" is unimportant by design).
+Either of the two "phrases"
+.B -Z0
+and
+.B -0Z
+may also be used for equivalent effect.
 .SH WARNING
 Never use the
 .B \-w, \-Z, or \-0
-options on a device containing an existing file system.
+options on a device containing an existing filesystem.
 These options erase data!  If you want to do write-mode testing on
-an existing device/file system without a guaranteed loss of data, use the
+an existing device/filesystem without a guaranteed loss of data, use the
 .B \-n
 option instead.  It is slower, but it will preserve your data,
 providing that the machine doesn`t crash, reset, or lose power
@@ -232,7 +335,17 @@ zero-out post-test pass) by Abe Skolnik <abe_skolnik@yahoo.com>.
 .SH AVAILABILITY
 .B badblocks
 is part of the e2fsprogs package and is available from
-http://e2fsprogs.sourceforge.net.
+.nf
+<http://e2fsprogs.sourceforge.net/>.
+.fi
+Primary development occurs at
+.nf
+<https://github.com/tytso/e2fsprogs>.
+.fi
+Please also see
+.nf
+<https://git.kernel.org/pub/scm/fs/ext2/e2fsprogs.git>.
+.fi
 .SH SEE ALSO
 .BR e2fsck (8),
 .BR mke2fs (8)
