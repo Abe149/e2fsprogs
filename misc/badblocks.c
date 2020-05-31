@@ -1096,8 +1096,6 @@ static unsigned int test___cryptoBased_readWrite_withOUT_postZeroing /* the rest
   #error "Something terribly unexpected happened with regards to the library providing SHA512 functionality."
 #endif
 
-	/* --- vvv --- WIP WIP WIP --- vvv --- */
-
 	num_blocks = last_block - 1; /* cargo-cult copy+paste */
 
 	int number_of_blocks_to_TRY_to_write_in_one_write = blocks_at_once, got;
@@ -1168,7 +1166,18 @@ static unsigned int test___cryptoBased_readWrite_withOUT_postZeroing /* the rest
 		++stride_number;
 	} /* end while */
 
+	flush_bufs();
+
 	if (s_flag | v_flag)  fputs(_(done_string), stderr);
+
+
+
+
+	/* --- vvv --- WIP WIP WIP --- vvv --- */
+
+
+/* TO DO: add here the code for testing the crypto layout that has [by "now", i.e. by this point, _already_] been laid down */
+
 
 	/* --- ^^^ --- WIP WIP WIP --- ^^^ --- */
 
@@ -1232,9 +1241,9 @@ static unsigned int test___cryptoBased_readWrite_WITH_postZeroing /* the rest of
 		}
 	} /* end while */
 
-	if (s_flag | v_flag)  fputs(_(done_string), stderr);
-
 	flush_bufs();
+
+	if (s_flag | v_flag)  fputs(_(done_string), stderr);
 
 	if (v_flag > 1)  fprintf(stderr, "\n''test___cryptoBased_readWrite_WITH_postZeroing'' about to return %d\n", to_return);
 
