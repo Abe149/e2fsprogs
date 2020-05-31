@@ -1044,15 +1044,12 @@ static unsigned int test_nd (int dev, blk_t last_block,
 
 typedef union {
   uint64_t the_uint64;
-  /* at least 9 so we can write a length=8 C string to it without overflowing */
-  uint8_t  the_array[9];
-//char     the_array[9] = "\x01\x02\x03\x04\x05\x06\x07\x08";// WIP 
+  uint8_t  the_array[99]; /* at least 9 so we can write a length=8 C string to it without overflowing */
 } endianness_test_union;
 
 uint32_t try_to_determine_endianness___exit_if_cannot() {
   endianness_test_union the_union;
   strncpy(the_union.the_array, "\x01\x02\x03\x04\x05\x06\x07\x08", 9);
-//  the_union.the_uint64 = 0x // WIP
 
   if (0x0102030405060708ull == the_union.the_uint64) {
     return THIS_IS_BIGENDIAN;
@@ -1074,10 +1071,9 @@ static unsigned int test___cryptoBased_readWrite_withOUT_postZeroing /* the rest
 
 	/* _Bool instead? */ char we_are_BIG_endian = 0, we_are_endian_little = 0;
 
-// WIP WIP WIP	/* const? */ uint32_t endianness_test_result = try_to_determine_endianness___exit_if_cannot();
 	switch ( try_to_determine_endianness___exit_if_cannot() ) {
-	  case THIS_IS_BIGENDIAN   :  we_are_BIG_endian    = 1; break;
-	  case THIS_IS_LITTLEENDIAN:  we_are_endian_little = 1; break;
+	  case THIS_IS_BIGENDIAN   :  we_are_BIG_endian    = 1; if (v_flag > 1)  fprintf(stderr, "BIG-endian detected.\n"); break;
+	  case THIS_IS_LITTLEENDIAN:  we_are_endian_little = 1; if (v_flag > 1)  fprintf(stderr, "endian-little detected.\n"); break;
 	  default: /* should _never_ happen, even if compiling for and running on a PDP-11 */ exit(9);
 	}
 
@@ -1088,7 +1084,8 @@ static unsigned int test___cryptoBased_readWrite_withOUT_postZeroing /* the rest
 		fprintf(stderr, "From block %lu to block %lu ...\n", (unsigned long) first_block, (unsigned long) last_block - 1);
 	}
 
-	unsigned char * /* maybe to add here: const */ buffer = allocate_buffer(2 * blocks_at_once * block_size);
+	/* buffer _must_ be of {pointer to 8-bit element} type for the sequence-number signature code to work as intended */
+	uint8_t * /* maybe to add here: const */ buffer = allocate_buffer(2 * blocks_at_once * block_size);
 	if (! buffer) {
 		com_err(program_name, ENOMEM, "%s", _("while allocating buffers"));
 		exit(1);
@@ -1106,6 +1103,7 @@ static unsigned int test___cryptoBased_readWrite_withOUT_postZeroing /* the rest
 	int number_of_blocks_to_TRY_to_write_in_one_write = blocks_at_once, got;
 	currently_testing = first_block;
 
+	uint64_t stride_number = 0ull;
 	while (currently_testing < last_block) {
 		if (currently_testing + number_of_blocks_to_TRY_to_write_in_one_write > last_block)
 			number_of_blocks_to_TRY_to_write_in_one_write = last_block - currently_testing;
@@ -1114,12 +1112,49 @@ static unsigned int test___cryptoBased_readWrite_withOUT_postZeroing /* the rest
 
 		arc4random_buf(buffer, number_of_bytes_to_randomize); /* secret sauce part 1 of 2 */
 
+		/* if we are going to write the stride sequence number at all, then we _really_ should do it *
+		 * _before_ hashing and let the hasher include this data as part of the data to be hashed    */
+		int8_t number_of_guaranteed_leading_allZeros_bytes = 99; /* 99 is a sentinel value */
+		/* the order of the comparisons in the following chain of if ... else if ... else if ... _MATTERS_ */
+
+		/* for now, I`m going to assume that we always have at least one leading all-zeros byte,          *
+		 * since we are using a 64-bit integer _and_ this counts the number of _strides_, with each       *
+		 * stride being expected to be of many blocks, and each block being expected to be of many bytes, *
+		 * so I expect a 56-bit "address" to be sufficient in this case                                   */
+
+		if      (stride_number <             0x100ull)  number_of_guaranteed_leading_allZeros_bytes = 7;
+		else if (stride_number <           0x10000ull)  number_of_guaranteed_leading_allZeros_bytes = 6;
+		else if (stride_number <         0x1000000ull)  number_of_guaranteed_leading_allZeros_bytes = 5;
+		else if (stride_number <       0x100000000ull)  number_of_guaranteed_leading_allZeros_bytes = 4;
+		else if (stride_number <     0x10000000000ull)  number_of_guaranteed_leading_allZeros_bytes = 3;
+		else if (stride_number <   0x1000000000000ull)  number_of_guaranteed_leading_allZeros_bytes = 2;
+		else if (stride_number < 0x100000000000000ull)  number_of_guaranteed_leading_allZeros_bytes = 1;
+		else exit(9);
+		if ( (number_of_guaranteed_leading_allZeros_bytes < 0) || (number_of_guaranteed_leading_allZeros_bytes > 8) )
+			exit(9); /* there ain`t no sanity clause :-( */
+
+		/* const? */ uint8_t number_of_bytes_needed_to_store_the_sequence_number_minimally =
+					8u - number_of_guaranteed_leading_allZeros_bytes;
+
+		buffer[0] = number_of_bytes_needed_to_store_the_sequence_number_minimally;
+		if      (we_are_endian_little) /* this is the easy case in this context, I think */
+			memcpy(buffer + 1, &stride_number, number_of_bytes_needed_to_store_the_sequence_number_minimally);
+		else if (we_are_BIG_endian)
+			memcpy(
+			       buffer + 1, ((char*)&stride_number) + number_of_guaranteed_leading_allZeros_bytes,
+			             /* ^^^^^^^ to force byte-wise pointer arithmetic; otherwise, using pointer arithmetic to do this would Do The Wrong Thing */
+			       number_of_bytes_needed_to_store_the_sequence_number_minimally
+			      );
+		else exit(9);
+
+		/* done creating a sequence-number signature */
+
 		/* secret sauce part 2 of 2 */
 		SHA512(        buffer,  number_of_bytes_to_randomize,
 			       buffer + number_of_bytes_to_randomize);
 
 		got = do_write(dev, buffer, number_of_blocks_to_TRY_to_write_in_one_write, block_size, currently_testing);
-		if (v_flag > 9)  fprintf(stderr, "                                             TESTING: got = %d, dev = %d, buffer = %llu, number_of_blocks_to_TRY_to_write_in_one_write = %d, block_size = %d, currently_testing = %d ...\n",  got, dev, buffer, number_of_blocks_to_TRY_to_write_in_one_write, block_size, currently_testing); /* there is a reason for the large run of spaces: interaction [& prevention thereof] with the status output from the "-s" flag */
+		if (v_flag > 9)  fprintf(stderr, "                                             TESTING: got = %d, dev = %d, buffer = %llu, number_of_blocks_to_TRY_to_write_in_one_write = %d, block_size = %d, currently_testing = %d, stride_number = %llu ...\n",  got, dev, buffer, number_of_blocks_to_TRY_to_write_in_one_write, block_size, currently_testing, stride_number); /* there is a reason for the large run of spaces: interaction [& prevention thereof] with the status output from the "-s" flag */
 
 		if (v_flag > 1)  print_status();
 
@@ -1130,6 +1165,7 @@ static unsigned int test___cryptoBased_readWrite_withOUT_postZeroing /* the rest
 			number_of_blocks_to_TRY_to_write_in_one_write = 1;
 			continue;
 		}
+		++stride_number;
 	} /* end while */
 
 	if (s_flag | v_flag)  fputs(_(done_string), stderr);
