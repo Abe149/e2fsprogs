@@ -334,18 +334,17 @@ Crypto-based two-pass destructive read-write test (with optional
 zero-out post-test pass) by Abe Skolnik <abe_skolnik@yahoo.com>.
 .SH AVAILABILITY
 .B badblocks
-is part of the e2fsprogs package and is available from
-.nf
-<http://e2fsprogs.sourceforge.net/>.
-.fi
-Primary development occurs at
-.nf
-<https://github.com/tytso/e2fsprogs>.
-.fi
-Please also see
-.nf
-<https://git.kernel.org/pub/scm/fs/ext2/e2fsprogs.git>.
-.fi
+is part of the e2fsprogs package and is available from:
+\n
+  <http://e2fsprogs.sourceforge.net/>
+\n
+Primary development occurs at:
+\n
+  <https://github.com/tytso/e2fsprogs>
+\n
+Please also see:
+\n
+  <https://git.kernel.org/pub/scm/fs/ext2/e2fsprogs.git>
 .SH SEE ALSO
 .BR e2fsck (8),
 .BR mke2fs (8)
