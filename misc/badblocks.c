@@ -401,8 +401,8 @@ static void pattern_fill(unsigned char *buffer, unsigned int pattern,
  * Perform a read of a sequence of blocks; return the number of blocks
  *    successfully sequentially read.
  */
-static int do_read (int dev, unsigned char * buffer, int try, int block_size,
-		    blk_t current_block)
+static int do_read(int dev, unsigned char * buffer, int try, int block_size,
+		   blk_t current_block)
 {
 	long got;
 	struct timeval tv1, tv2;
@@ -432,8 +432,10 @@ static int do_read (int dev, unsigned char * buffer, int try, int block_size,
 	if (d_flag)
 		gettimeofday(&tv2, NULL);
 
-	if (got < 0)
+	if (got < 0) { /* an error condition */
+		if (v_flag > 2)  fprintf(stderr, "the real value of ''got'' in ''do_read'', i.e. just after ''read'': %d\n", got);
 		got = 0;
+	}
 
 	if (got & 511)
 		fprintf(stderr, _("Weird value (%ld) in do_read\n"), got);
@@ -504,10 +506,15 @@ static int do_write(int dev, unsigned char * buffer, int try, int block_size,
 
 	/* Try the write */
 	got = write(dev, buffer, try * block_size); /* from unistd.h */
-	if (v_flag > 2)  fprintf(stderr, "the real value of ''got'', i.e. before dividing by ''block_size'': %d\n", got);
+	if (v_flag > 2)  fprintf(stderr, "the real value of ''got'' in ''do_write'', "
+					 "i.e. just after ''write'' and before dividing by ''block_size'': %d\n", got);
 
 	if (got < 0) { /* an error condition */
-	  return 0; /* callers of this function only want in the return value {how many blocks were successfully written} */
+		if (v_flag <= 2)  fprintf(stderr, "the real value of ''got'' in ''do_write'', "
+	     /* ^^^^^^^^^^^^^^^^ no need to "say it again" right after having "said" the exact same thing */
+						  "i.e. just after ''write'' and before dividing by ''block_size'': %d\n", got);
+
+		return 0; /* callers of this function only want in the return value {how many blocks were successfully written} */
 	}
 
 	if (got & 511)  fprintf(stderr, "Weird value (%ld) in do_write\n", got);
