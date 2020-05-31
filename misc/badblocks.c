@@ -85,6 +85,7 @@ extern int optind;
     ) && ! defined(DISABLE_CRYPTO)
   #include  <bsd/stdlib.h>
   #include <openssl/sha.h>
+  #include <stdint.h>
   #define GREEN_LIGHT_FOR_CRYPTO 1
 #endif
 
@@ -1038,6 +1039,29 @@ static unsigned int test_nd (int dev, blk_t last_block,
 
 
 
+#define THIS_IS_BIGENDIAN    (0x87654321)
+#define THIS_IS_LITTLEENDIAN (0x12345678)
+
+typedef union {
+  uint64_t the_uint64;
+  /* at least 9 so we can write a length=8 C string to it without overflowing */
+  uint8_t  the_array[9];
+//char     the_array[9] = "\x01\x02\x03\x04\x05\x06\x07\x08";// WIP 
+} endianness_test_union;
+
+uint32_t try_to_determine_endianness___exit_if_cannot() {
+  endianness_test_union the_union;
+  strncpy(the_union.the_array, "\x01\x02\x03\x04\x05\x06\x07\x08", 9);
+//  the_union.the_uint64 = 0x // WIP
+
+  if (0x0102030405060708ull == the_union.the_uint64) {
+    return THIS_IS_BIGENDIAN;
+  } else if (0x0807060504030201ull == the_union.the_uint64) {
+    return THIS_IS_LITTLEENDIAN;
+  } else  exit(1);
+}
+
+
 static unsigned int test___cryptoBased_readWrite_withOUT_postZeroing /* the rest of this function header represents an interface that is mandated by the scaffolding that calls this function */
 			(int dev, blk_t last_block,
 			 int block_size, blk_t first_block,
@@ -1047,6 +1071,15 @@ static unsigned int test___cryptoBased_readWrite_withOUT_postZeroing /* the rest
 
 	if (v_flag > 1)  fprintf(stderr, "\n''test___cryptoBased_readWrite_withOUT_postZeroing'' was called.\n");
 	VERBOSE_DEBUG_OUTPUT_FOR_TEST_FUNCTIONS
+
+	/* _Bool instead? */ char we_are_BIG_endian = 0, we_are_endian_little = 0;
+
+// WIP WIP WIP	/* const? */ uint32_t endianness_test_result = try_to_determine_endianness___exit_if_cannot();
+	switch ( try_to_determine_endianness___exit_if_cannot() ) {
+	  case THIS_IS_BIGENDIAN   :  we_are_BIG_endian    = 1; break;
+	  case THIS_IS_LITTLEENDIAN:  we_are_endian_little = 1; break;
+	  default: /* should _never_ happen, even if compiling for and running on a PDP-11 */ exit(9);
+	}
 
 	flush_bufs();
 
