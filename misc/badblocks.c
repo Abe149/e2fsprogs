@@ -1201,23 +1201,13 @@ static unsigned int test___cryptoBased_readWrite_withOUT_postZeroing /* the rest
 		} else this_stride_is_bad = 1;
 
 		if (this_stride_is_bad) {
-			/* WIP plan: limit = currently_testing + got;
-				     do:
-						report bad block at "currently_testing"
-						++currently_testing
-			 	     ... while currently_testing < limit
-			*/
+			/* const? */ uint64_t limit = currently_testing + got;
+			do {
+				++count_of_bad_blocks_found;
+				bb_output(currently_testing, CORRUPTION_ERROR);
+				++currently_testing;
+			   } while (currently_testing < limit);
 		} else currently_testing += got;
-
-
-		/* DELENDA EST -- copy-pasta
-		for (i=0; i < got; i++) {
-			if (memcmp(read_buffer + i * block_size,
-				   buffer + i * block_size,
-				   block_size))
-				bb_count += bb_output(currently_testing+i, CORRUPTION_ERROR);
-		}
-		*/
 
 		if (v_flag > 1)  print_status();
 	}
