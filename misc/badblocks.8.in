@@ -207,12 +207,14 @@ and
 It bypasses the exclusive mode in-use device safety check.
 .SH WARNING
 Never use the
-.B \-w
-option on a device containing an existing file system.
-This option erases data!  If you want to do write-mode testing on
-an existing file system, use the
+.B \-w, \-Z, or \-0
+options on a device containing an existing file system.
+These options erase data!  If you want to do write-mode testing on
+an existing device/file system without a guaranteed loss of data, use the
 .B \-n
-option instead.  It is slower, but it will preserve your data.
+option instead.  It is slower, but it will preserve your data,
+providing that the machine doesn`t crash, reset, or lose power
+during the test.  (Killing the testing process with "-9" would be bad too.)
 .PP
 The
 .B \-e
@@ -220,11 +222,13 @@ option will cause badblocks to output a possibly incomplete list of
 bad blocks. Therefore it is recommended to use it only when one wants
 to know if there are any bad blocks at all on the device, and not when
 the list of bad blocks is wanted.
-.SH AUTHOR
+.SH AUTHORS
 .B badblocks
 was written by Remy Card <Remy.Card@linux.org>.  Current maintainer is
 Theodore Ts'o <tytso@alum.mit.edu>.  Non-destructive read/write test
 implemented by David Beattie <dbeattie@softhome.net>.
+Crypto-based two-pass destructive read-write test (with optional
+zero-out post-test pass) by Abe Skolnik <abe_skolnik@yahoo.com>.
 .SH AVAILABILITY
 .B badblocks
 is part of the e2fsprogs package and is available from
