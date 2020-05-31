@@ -18,7 +18,8 @@
  */
 
 /*
- * History:
+ * History
+ * -------
  * 93/05/26 - Creation from e2fsck
  * 94/02/27 - Made a separate bad blocks checker
  * 99/06/30...99/07/26 - Added non-destructive write-testing,
@@ -39,12 +40,14 @@
 #include "config.h"
 #include <errno.h>
 #include <fcntl.h>
+
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>
 #else
 extern char *optarg;
 extern int optind;
 #endif
+
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -53,6 +56,7 @@ extern int optind;
 #include <setjmp.h>
 #include <time.h>
 #include <limits.h>
+
 #ifdef HAVE_MBSTOWCS
 #include <wchar.h>
 #endif
@@ -282,7 +286,7 @@ static void print_status(void)
 
 static void alarm_intr(int alnum EXT2FS_ATTR((unused)))
 {
-	signal (SIGALRM, alarm_intr);
+	signal(SIGALRM, alarm_intr);
 	alarm(1);
 	if (!num_blocks)
 		return;
@@ -324,7 +328,7 @@ static void uncapture_terminate(void)
 	signal (SIGUSR2, SIG_DFL);
 }
 
-/* Linux requires that O_DIRECT I/Os be 512-byte sector aligned */
+/* Linux requires that O_DIRECT I/Os be aligned to 512-byte sectors */
 
 #define O_DIRECT_SIZE 512
 
@@ -422,13 +426,18 @@ static int do_read (int dev, unsigned char * buffer, int try, int block_size,
 	/* Try the read */
 	if (d_flag)
 		gettimeofday(&tv1, NULL);
-	got = read (dev, buffer, try * block_size);
+
+	got = read(dev, buffer, try * block_size);
+
 	if (d_flag)
 		gettimeofday(&tv2, NULL);
+
 	if (got < 0)
 		got = 0;
+
 	if (got & 511)
 		fprintf(stderr, _("Weird value (%ld) in do_read\n"), got);
+
 	got /= block_size;
 	if (d_flag && got == try) {
 #ifdef HAVE_NANOSLEEP
@@ -476,7 +485,8 @@ static int do_read (int dev, unsigned char * buffer, int try, int block_size,
 static int do_write(int dev, unsigned char * buffer, int try, int block_size,
 		    unsigned long current_block)
 {
-	long got;
+	ssize_t got; /* this should be a "ssize_t", according to
+			<https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/unistd.h.html> */
 
 #if 0
 	printf("do_write: block %lu, try %d\n", current_block, try);
@@ -496,11 +506,12 @@ static int do_write(int dev, unsigned char * buffer, int try, int block_size,
 	got = write(dev, buffer, try * block_size); /* from unistd.h */
 	if (v_flag > 2)  fprintf(stderr, "the real value of ''got'', i.e. before dividing by ''block_size'': %d\n", got);
 
-	if (got < 0)  for (;;); // SPIN FOR DEBUG
-// TEMP. DISABLED:		got = 0;
+	if (got < 0) { /* an error condition */
+	  return 0; /* callers of this function only want in the return value {how many blocks were successfully written} */
+	}
 
-	if (got & 511)
-		fprintf(stderr, "Weird value (%ld) in do_write\n", got);
+	if (got & 511)  fprintf(stderr, "Weird value (%ld) in do_write\n", got);
+
 	got /= block_size;
 	return got;
 }
@@ -521,9 +532,9 @@ static void flush_bufs(void)
 			_("during ext2fs_sync_device"));
 }
 
-static unsigned int test_ro (int dev, blk_t last_block,
-			     int block_size, blk_t first_block,
-			     unsigned int blocks_at_once)
+static unsigned int test_ro(int dev, blk_t last_block,
+			    int block_size, blk_t first_block,
+			    unsigned int blocks_at_once)
 {
 	unsigned char * blkbuf;
 	int try;
@@ -562,7 +573,7 @@ static unsigned int test_ro (int dev, blk_t last_block,
 			(unsigned long)last_block - 1);
 	}
 	if (t_flag) {
-		fputs(_("Checking for bad blocks in read-only mode\n"), stderr);
+		fputs(_("Checking for bad blocks in read-only mode...\n"), stderr);
 		pattern_fill(blkbuf + blocks_at_once * block_size,
 			     t_patts[0], block_size);
 	}
@@ -578,7 +589,7 @@ static unsigned int test_ro (int dev, blk_t last_block,
 	{
 		if (bb_count >= max_bb) {
 			if (s_flag || v_flag) {
-				fputs(_("Too many bad blocks, aborting test\n"), stderr);
+				fputs(_("Too many bad blocks; aborting test.\n"), stderr);
 			}
 			break;
 		}
@@ -624,8 +635,8 @@ static unsigned int test_ro (int dev, blk_t last_block,
 	if (s_flag || v_flag)
 		fputs(_(done_string), stderr);
 
-	fflush (stderr);
-	free (blkbuf);
+	fflush(stderr);
+	free(blkbuf);
 
 	ext2fs_badblocks_list_iterate_end(bb_iter);
 
@@ -634,9 +645,9 @@ static unsigned int test_ro (int dev, blk_t last_block,
 	return bb_count;
 }
 
-static unsigned int test_rw (int dev, blk_t last_block,
-			     int block_size, blk_t first_block,
-			     unsigned int blocks_at_once)
+static unsigned int test_rw(int dev, blk_t last_block,
+			    int block_size, blk_t first_block,
+			    unsigned int blocks_at_once)
 {
 	unsigned char *buffer, *read_buffer;
 	const unsigned int patterns[] = {0xaa, 0x55, 0xff, 0x00};
@@ -654,17 +665,17 @@ static unsigned int test_rw (int dev, blk_t last_block,
 	if (!buffer) {
 		com_err(program_name, ENOMEM, "%s",
 			_("while allocating buffers"));
-		exit (1);
+		exit(1);
 	}
 
 	flush_bufs();
 
 	if (v_flag) {
-		fputs(_("Checking for bad blocks in read-write mode\n"),
+		fputs(_("Checking for bad blocks in read-write mode...\n"),
 		      stderr);
 		fprintf(stderr, _("From block %lu to %lu\n"),
 			(unsigned long) first_block,
-			(unsigned long) last_block - 1);
+			(unsigned long)  last_block - 1);
 	}
 	if (t_flag) {
 		pattern = t_patts;
@@ -676,6 +687,7 @@ static unsigned int test_rw (int dev, blk_t last_block,
 	for (pat_idx = 0; pat_idx < nr_pattern; pat_idx++) {
 		pattern_fill(buffer, pattern[pat_idx],
 			     blocks_at_once * block_size);
+
 		num_blocks = last_block - 1;
 		currently_testing = first_block;
 		if (s_flag && v_flag <= 1)
@@ -691,9 +703,12 @@ static unsigned int test_rw (int dev, blk_t last_block,
 			}
 			if (currently_testing + try > last_block)
 				try = last_block - currently_testing;
+
 			got = do_write(dev, buffer, try, block_size,
 					currently_testing);
+
 			if (v_flag > 9)  fprintf(stderr, "                                             TESTING: got = %d, dev = %d, buffer = %llu, try = %d, block_size = %d, currently_testing = %d ...\n",  got, dev, buffer, try, block_size, currently_testing); /* there is a reason for the large run of spaces: interaction [& prevention thereof] with the status output from the "-s" flag */
+
 			if (v_flag > 1)
 				print_status();
 
@@ -716,9 +731,11 @@ static unsigned int test_rw (int dev, blk_t last_block,
 		alarm (0);
 		if (s_flag | v_flag)
 			fputs(_(done_string), stderr);
+
 		flush_bufs();
 		if (s_flag | v_flag)
 			fputs(_("Reading and comparing: "), stderr);
+
 		num_blocks = last_block;
 		currently_testing = first_block;
 		if (s_flag && v_flag <= 1)
@@ -728,7 +745,7 @@ static unsigned int test_rw (int dev, blk_t last_block,
 		while (currently_testing < last_block) {
 			if (bb_count >= max_bb) {
 				if (s_flag || v_flag) {
-					fputs(_("Too many bad blocks, aborting test\n"), stderr);
+					fputs(_("Too many bad blocks; aborting test.\n"), stderr);
 				}
 				break;
 			}
@@ -775,9 +792,9 @@ struct saved_blk_record {
 	int	num;
 };
 
-static unsigned int test_nd (int dev, blk_t last_block,
-			     int block_size, blk_t first_block,
-			     unsigned int blocks_at_once)
+static unsigned int test_nd(int dev, blk_t last_block,
+			    int block_size, blk_t first_block,
+			    unsigned int blocks_at_once)
 {
 	unsigned char *blkbuf, *save_ptr, *test_ptr, *read_ptr;
 	unsigned char *test_base, *save_base, *read_base;
@@ -802,6 +819,7 @@ static unsigned int test_nd (int dev, blk_t last_block,
 	if (errcode) {
 		com_err(program_name, errcode, "%s",
 			_("while beginning bad block list iteration"));
+
 		exit (1);
 	}
 	do {
@@ -813,6 +831,7 @@ static unsigned int test_nd (int dev, blk_t last_block,
 	if (!blkbuf || !test_record) {
 		com_err(program_name, ENOMEM, "%s",
 			_("while allocating buffers"));
+
 		exit (1);
 	}
 
@@ -824,10 +843,12 @@ static unsigned int test_nd (int dev, blk_t last_block,
 
 	flush_bufs();
 	if (v_flag) {
-	    fputs(_("Checking for bad blocks in non-destructive read-write mode\n"), stderr);
-	    fprintf (stderr, _("From block %lu to %lu\n"),
-		     (unsigned long) first_block,
-		     (unsigned long) last_block - 1);
+	    fputs(_("Checking for bad blocks in non-destructive read-write mode...\n"), stderr);
+	    fprintf(
+		    stderr, _("From block %lu to %lu\n"),
+		    (unsigned long) first_block,
+		    (unsigned long)  last_block - 1
+		   );
 	}
 	if (s_flag || v_flag > 1) {
 		fputs(_("Checking for bad blocks (non-destructive read-write test)\n"), stderr);
@@ -836,7 +857,7 @@ static unsigned int test_nd (int dev, blk_t last_block,
 		/*
 		 * Abnormal termination by a signal is handled here.
 		 */
-		signal (SIGALRM, SIG_IGN);
+		signal(SIGALRM, SIG_IGN);
 		fputs(_("\nInterrupt caught, cleaning up\n"), stderr);
 
 		save_ptr = save_base;
@@ -845,7 +866,7 @@ static unsigned int test_nd (int dev, blk_t last_block,
 				 block_size, test_record[i].block);
 			save_ptr += test_record[i].num * block_size;
 		}
-		fflush (out);
+		fflush(out);
 		exit(1);
 	}
 
@@ -892,7 +913,7 @@ static unsigned int test_nd (int dev, blk_t last_block,
 			}
 			if (currently_testing + try > last_block)
 				try = last_block - currently_testing;
-			got = do_read (dev, save_ptr, try, block_size,
+			got = do_read(dev, save_ptr, try, block_size,
 				       currently_testing);
 			if (got == 0) {
 				if (recover_block == ~0U)
@@ -1205,7 +1226,7 @@ static unsigned int test___cryptoBased_readWrite_withOUT_postZeroing /* the rest
 		if (got == number_of_blocks_to_TRY_to_write_in_one_write) {
 			/* --- VALIDATE --- */
 
-		/* validate the sequence number _first_, reject if bad [i.e. don`t bother checksumming if bad SN] */
+			/* validate the sequence number _first_, reject if bad [i.e. don`t bother checksumming if bad SN] */
 
 			/* const? */ int8_t number_of_guaranteed_leading_allZeros_bytes = 
 						stride_number___to___number_of_guaranteed_leading_allZeros_bytes(stride_number);
@@ -1246,7 +1267,7 @@ static unsigned int test___cryptoBased_readWrite_withOUT_postZeroing /* the rest
 					SHA512(
 						buffer,
 						(number_of_blocks_to_TRY_to_write_in_one_write * block_size) - SHA512_DIGEST_LENGTH,
-						NULL /* as in "please use your static buffer and not one of my own choosing */
+						NULL /* as in "please use your (static) buffer and not one of my own choosing */
 					      );
 
 				if ( memcmp( /* _intentionally_ not the usual/idiomatic "! memcmp(...)" */
@@ -1364,6 +1385,7 @@ static void check_mount(char *device_name)
 		com_err("ext2fs_check_if_mount", retval,
 			_("while determining whether %s is mounted."),
 			device_name);
+
 		return;
 	}
 	if (mount_flags & EXT2_MF_MOUNTED) {
@@ -1371,6 +1393,7 @@ static void check_mount(char *device_name)
 		if (force) {
 			fputs(_("badblocks forced anyway.  "
 				"Hope /etc/mtab is incorrect.\n"), stderr);
+
 			return;
 		}
 	abort_badblocks:
@@ -1381,6 +1404,7 @@ static void check_mount(char *device_name)
 	if ((mount_flags & EXT2_MF_BUSY) && !exclusive_ok) {
 		fprintf(stderr, _("%s is apparently in use by the system; "),
 			device_name);
+
 		if (force)
 			fputs(_("badblocks forced anyway.\n"), stderr);
 		else
@@ -1462,6 +1486,7 @@ int main (int argc, char ** argv)
 
 	if (argc && *argv)
 		program_name = *argv;
+
 	while ((c = getopt (
 			    argc,
 			    argv, 
@@ -1574,7 +1599,6 @@ int main (int argc, char ** argv)
 #if defined(GREEN_LIGHT_FOR_CRYPTO) && GREEN_LIGHT_FOR_CRYPTO>0
 		case 'Z':
 			use_cryptoBased_readWrite_test_mode = 1;
-			printf("\nWIP warning: use_cryptoBased_readWrite_test_mode now = %d, but feature programming not yet complete.\n\n", use_cryptoBased_readWrite_test_mode); /* WIP WIP WIP */
 			if ( w_flag && (w_flag != 3) )  exclusive_usage();
 
 			/* reason for the condition on the next line: to make "-0Z" mean the same thing as "-Z0"; otherwise, it might be _very_ confusing for the user */
@@ -1587,8 +1611,6 @@ int main (int argc, char ** argv)
 /* design note: should I/we make "-0" without "-Z' an error, instead of allowing it to mean the same thing as both "-0Z" & "-Z0"? */
 			zero_drive_after_cryptoBased_test = 1;
 			use_cryptoBased_readWrite_test_mode = 1;
-			printf("\nWIP warning: use_cryptoBased_readWrite_test_mode now = %d, but feature programming not yet complete.\n", use_cryptoBased_readWrite_test_mode); /* WIP WIP WIP */
-			printf(  "WIP warning: zero_drive_after_cryptoBased_test now = %d, but feature programming not yet complete.\n\n", zero_drive_after_cryptoBased_test); /* WIP WIP WIP */
 			if ( w_flag && (w_flag != 3) )  exclusive_usage();
 			test_func = test___cryptoBased_readWrite_WITH_postZeroing;
 			w_flag = 3;
@@ -1603,9 +1625,9 @@ int main (int argc, char ** argv)
 
 /* design note: should I/we make "-0" without "-Z' an error, instead of allowing it to mean the same thing as both "-0Z" & "-Z0"? */
 
-	if (v_flag) {
-			fprintf(stderr, "\nINFO: use_cryptoBased_readWrite_test_mode = %d after finishing ''getopt'' phase, but feature programming not yet complete.\n\n", use_cryptoBased_readWrite_test_mode); /* WIP WIP WIP */
-			fprintf(stderr, "\nINFO: zero_drive_after_cryptoBased_test = %d after finishing ''getopt'' phase, but feature programming not yet complete.\n\n", zero_drive_after_cryptoBased_test); /* WIP WIP WIP */
+	if (v_flag > 9) {
+			fprintf(stderr, "\nINFO: use_cryptoBased_readWrite_test_mode = %d after finishing ''getopt'' phase.\n\n", use_cryptoBased_readWrite_test_mode);
+			fprintf(stderr, "\nINFO: zero_drive_after_cryptoBased_test   = %d after finishing ''getopt'' phase.\n\n", zero_drive_after_cryptoBased_test);
 	}
 #endif
 
@@ -1625,11 +1647,13 @@ int main (int argc, char ** argv)
 	}
 	if (optind > argc - 1)
 		usage();
+
 	device_name = argv[optind++];
 	if (optind > argc - 1) {
 		errcode = ext2fs_get_device_size2(device_name,
 						 block_size,
 						 &last_block);
+
 		if (errcode == EXT2_ET_UNIMPLEMENTED) {
 			com_err(program_name, 0, "%s",
 				_("Couldn't determine device size; you "
@@ -1650,6 +1674,7 @@ int main (int argc, char ** argv)
 	if (optind <= argc-1) {
 		errno = 0;
 		first_block = parse_uint(argv[optind], _("first block"));
+
 	} else first_block = 0;
 	if (first_block >= last_block) {
 	    com_err (program_name, 0, _("invalid starting block (%llu): must be less than %llu"),
@@ -1692,6 +1717,7 @@ int main (int argc, char ** argv)
 		if (host_dev == -1) {
 			com_err (program_name, errno,
 				 _("while trying to open %s"),
+
 				 host_device_name);
 			exit (1);
 		}
@@ -1729,6 +1755,7 @@ int main (int argc, char ** argv)
 	if (errcode) {
 		com_err(program_name, errcode, "%s",
 			_("while creating in-memory bad blocks list"));
+
 		exit (1);
 	}
 
@@ -1738,24 +1765,30 @@ int main (int argc, char ** argv)
 				case 0:
 					com_err(program_name, 0, "%s",
 						_("input file - bad format"));
+
 					exit (1);
 				case EOF:
 					break;
 				default:
 					if (inblk >> 32) {
-						com_err(program_name,
-							EOVERFLOW, "%s",
-						_("while adding to in-memory "
-						  "bad block list"));
+						com_err(
+							program_name,
+							EOVERFLOW,
+							"%s",
+							_("while adding to in-memory bad block list")
+						       );
+
 						exit(1);
 					}
 					next_bad = inblk;
 					errcode = ext2fs_badblocks_list_add(bb_list,next_bad);
 					if (errcode) {
-						com_err(program_name, errcode,
+						com_err(program_name,
+							errcode,
 							"%s",
-						_("while adding to in-memory "
-						  "bad block list"));
+							_("while adding to in-memory bad block list")
+						       );
+
 						exit (1);
 					}
 					continue;
@@ -1787,6 +1820,7 @@ int main (int argc, char ** argv)
 	close (dev);
 	if (out != stdout)
 		fclose (out);
+
 	free(t_patts);
 	return 0;
 }
