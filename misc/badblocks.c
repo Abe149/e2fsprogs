@@ -1058,6 +1058,23 @@ uint32_t try_to_determine_endianness___exit_if_cannot() {
   } else  exit(1);
 }
 
+uint8_t stride_number___to___number_of_guaranteed_leading_allZeros_bytes(uint64_t stride_number) {
+	/* the order of the comparisons in the following chain of if ... else if ... else if ... _MATTERS_ */
+
+	/* for now, I`m going to assume that we always have at least one leading all-zeros byte,          *
+	 * since we are using a 64-bit integer _and_ this counts the number of _strides_, with each       *
+	 * stride being expected to be of many blocks, and each block being expected to be of many bytes, *
+	 * so I expect a 56-bit "address" to be sufficient for all real-world use cases for many years    */
+	if (stride_number <             0x100ull)  return 7;
+	if (stride_number <           0x10000ull)  return 6;
+	if (stride_number <         0x1000000ull)  return 5;
+	if (stride_number <       0x100000000ull)  return 4;
+	if (stride_number <     0x10000000000ull)  return 3;
+	if (stride_number <   0x1000000000000ull)  return 2;
+	if (stride_number < 0x100000000000000ull)  return 1;
+	exit(9); /* sanity failure :-( */
+}
+
 
 static unsigned int test___cryptoBased_readWrite_withOUT_postZeroing /* the rest of this function header represents an interface that is mandated by the scaffolding that calls this function */
 			(int dev, blk_t last_block,
@@ -1072,10 +1089,13 @@ static unsigned int test___cryptoBased_readWrite_withOUT_postZeroing /* the rest
 	/* _Bool instead? */ char we_are_BIG_endian = 0, we_are_endian_little = 0;
 
 	switch ( try_to_determine_endianness___exit_if_cannot() ) {
-	  case THIS_IS_BIGENDIAN   :  we_are_BIG_endian    = 1; if (v_flag > 1)  fprintf(stderr, "BIG-endian detected.\n"); break;
+	  case THIS_IS_BIGENDIAN   :  we_are_BIG_endian    = 1; if (v_flag > 1)  fprintf(stderr, "BIG-endian    detected.\n"); break;
 	  case THIS_IS_LITTLEENDIAN:  we_are_endian_little = 1; if (v_flag > 1)  fprintf(stderr, "endian-little detected.\n"); break;
-	  default: /* should _never_ happen, even if compiling for and running on a PDP-11 */ exit(9);
+       /* case THIS_IS_SPARTA: exit(300); */
+
+	  default: /* should _never_ happen/{be reached}, even if compiling for and running on a PDP-11 */ exit(9);
 	}
+
 
 	flush_bufs();
 
@@ -1110,24 +1130,12 @@ static unsigned int test___cryptoBased_readWrite_withOUT_postZeroing /* the rest
 
 		arc4random_buf(buffer, number_of_bytes_to_randomize); /* secret sauce part 1 of 2 */
 
-		/* if we are going to write the stride sequence number at all, then we _really_ should do it *
-		 * _before_ hashing and let the hasher include this data as part of the data to be hashed    */
-		int8_t number_of_guaranteed_leading_allZeros_bytes = 99; /* 99 is a sentinel value */
-		/* the order of the comparisons in the following chain of if ... else if ... else if ... _MATTERS_ */
+		/* if we are going to write the stride sequence number at all, then we _really_ should do so                   *
+		 * [and are doing so] _before_ hashing, and let the hasher include this data as part of the data to be hashed  */
 
-		/* for now, I`m going to assume that we always have at least one leading all-zeros byte,          *
-		 * since we are using a 64-bit integer _and_ this counts the number of _strides_, with each       *
-		 * stride being expected to be of many blocks, and each block being expected to be of many bytes, *
-		 * so I expect a 56-bit "address" to be sufficient in this case                                   */
+		/* const? */ int8_t number_of_guaranteed_leading_allZeros_bytes = 
+					stride_number___to___number_of_guaranteed_leading_allZeros_bytes(stride_number);
 
-		if      (stride_number <             0x100ull)  number_of_guaranteed_leading_allZeros_bytes = 7;
-		else if (stride_number <           0x10000ull)  number_of_guaranteed_leading_allZeros_bytes = 6;
-		else if (stride_number <         0x1000000ull)  number_of_guaranteed_leading_allZeros_bytes = 5;
-		else if (stride_number <       0x100000000ull)  number_of_guaranteed_leading_allZeros_bytes = 4;
-		else if (stride_number <     0x10000000000ull)  number_of_guaranteed_leading_allZeros_bytes = 3;
-		else if (stride_number <   0x1000000000000ull)  number_of_guaranteed_leading_allZeros_bytes = 2;
-		else if (stride_number < 0x100000000000000ull)  number_of_guaranteed_leading_allZeros_bytes = 1;
-		else exit(9);
 		if ( (number_of_guaranteed_leading_allZeros_bytes < 0) || (number_of_guaranteed_leading_allZeros_bytes > 8) )
 			exit(9); /* there ain`t no sanity clause :-( */
 
@@ -1139,8 +1147,9 @@ static unsigned int test___cryptoBased_readWrite_withOUT_postZeroing /* the rest
 			memcpy(buffer + 1, &stride_number, number_of_bytes_needed_to_store_the_sequence_number_minimally);
 		else if (we_are_BIG_endian)
 			memcpy(
-			       buffer + 1, ((char*)&stride_number) + number_of_guaranteed_leading_allZeros_bytes,
-			             /* ^^^^^^^ to force byte-wise pointer arithmetic; otherwise, using pointer arithmetic to do this would Do The Wrong Thing */
+			       buffer + 1, ((uint8_t*)&stride_number) + number_of_guaranteed_leading_allZeros_bytes,
+					/*  ^^^^^^^^^ to force byte-wise pointer arithmetic;                       *
+					 * otherwise, using pointer arithmetic to do this would Do The Wrong Thing */
 			       number_of_bytes_needed_to_store_the_sequence_number_minimally
 			      );
 		else exit(9);
@@ -1171,11 +1180,6 @@ static unsigned int test___cryptoBased_readWrite_withOUT_postZeroing /* the rest
 	if (s_flag | v_flag)  fputs(_(done_string), stderr);
 
 
-
-
-	/* --- vvv --- WIP WIP WIP --- vvv --- */
-
-
 	/* testing the crypto layout that has [by "now", i.e. by this point, _already_] been laid down */
 
 	if (s_flag | v_flag)  fputs(_("Reading and validating: "), stderr);
@@ -1184,6 +1188,8 @@ static unsigned int test___cryptoBased_readWrite_withOUT_postZeroing /* the rest
 	if (s_flag && v_flag <= 1)  alarm_intr(SIGALRM);
 
 	number_of_blocks_to_TRY_to_write_in_one_write = blocks_at_once;
+
+	stride_number = 0ull;
 	while (currently_testing < last_block) {
 		if (count_of_bad_blocks_found >= max_bb) {
 			if (s_flag || v_flag)  fputs(_("Too many bad blocks; aborting test.\n"), stderr);
@@ -1199,27 +1205,61 @@ static unsigned int test___cryptoBased_readWrite_withOUT_postZeroing /* the rest
 		if (got == number_of_blocks_to_TRY_to_write_in_one_write) {
 			/* --- VALIDATE --- */
 
+		/* validate the sequence number _first_, reject if bad [i.e. don`t bother checksumming if bad SN] */
 
+			/* const? */ int8_t number_of_guaranteed_leading_allZeros_bytes = 
+						stride_number___to___number_of_guaranteed_leading_allZeros_bytes(stride_number);
 
-		/* WIP TO DO: validate the sequence number _first_, reject if bad [i.e. don`t bother checksumming if bad SN] */
+			if ( (number_of_guaranteed_leading_allZeros_bytes < 0) || (number_of_guaranteed_leading_allZeros_bytes > 8) )
+				exit(9); /* there ain`t no sanity clause :-( */
 
+			/* const? */ uint8_t number_of_bytes_needed_to_store_the_sequence_number_minimally =
+						8u - number_of_guaranteed_leading_allZeros_bytes;
 
+			if (number_of_bytes_needed_to_store_the_sequence_number_minimally != buffer[0])
+				this_stride_is_bad = 1;
+				/* _INTENTIONALLY_ no "break;" or "continue;" here -- in this context, either one would be Bad */
+			else {
 
-			unsigned char* /* const? */ checksum_in_static_buffer =
-				SHA512(
-					buffer,
-					(number_of_blocks_to_TRY_to_write_in_one_write * block_size) - SHA512_DIGEST_LENGTH,
-					NULL /* as in "please use your static buffer and not one of my own choosing */
-				      );
+				if      (we_are_endian_little) /* this is the easy case in this context, I think */
+					this_stride_is_bad = !! memcmp(
+								       buffer + 1,
+								       &stride_number,
+								       number_of_bytes_needed_to_store_the_sequence_number_minimally
+								      );
+				else if (we_are_BIG_endian)
+					this_stride_is_bad =
+						!! memcmp(
+							  buffer + 1,
+							  ((uint8_t*)&stride_number) + number_of_guaranteed_leading_allZeros_bytes,
+					      /*           ^^^^^^^^^^                   *
+					       * to force byte-wise pointer arithmetic; *
+					       * otherwise, using pointer arithmetic to *
+					       * do this would Do The Wrong Thing       */
+							  number_of_bytes_needed_to_store_the_sequence_number_minimally
+					      );
+				else exit(9);
+			}
 
-			if ( memcmp( /* _intentionally_ not the usual/idiomatic "! memcmp(...)" */
-					checksum_in_static_buffer,
-					buffer + (number_of_blocks_to_TRY_to_write_in_one_write * block_size) - SHA512_DIGEST_LENGTH,
-					SHA512_DIGEST_LENGTH
-				   )
-			) this_stride_is_bad = 1;
+			if (! this_stride_is_bad) { /* don`t bother checking the SHA512sum if we already know it`s a bad stride */
+				/* const? */ unsigned char* /* const? */ checksum_in_static_buffer =
+					SHA512(
+						buffer,
+						(number_of_blocks_to_TRY_to_write_in_one_write * block_size) - SHA512_DIGEST_LENGTH,
+						NULL /* as in "please use your static buffer and not one of my own choosing */
+					      );
+
+				if ( memcmp( /* _intentionally_ not the usual/idiomatic "! memcmp(...)" */
+						checksum_in_static_buffer,
+						buffer + (number_of_blocks_to_TRY_to_write_in_one_write * block_size) - SHA512_DIGEST_LENGTH,
+						SHA512_DIGEST_LENGTH
+					   )
+				) this_stride_is_bad = 1;
+				/* _INTENTIONALLY_ no "break;" or "continue;" here -- in this context, either one would be Bad */
+			}
 
 		} else this_stride_is_bad = 1;
+		/* _INTENTIONALLY_ no "break;" or "continue;" here -- in this context, either one would be Bad */
 
 		if (this_stride_is_bad) {
 			/* const? */ uint64_t limit = currently_testing + got;
@@ -1231,22 +1271,19 @@ static unsigned int test___cryptoBased_readWrite_withOUT_postZeroing /* the rest
 		} else currently_testing += got;
 
 		if (v_flag > 1)  print_status();
-	}
+
+		++stride_number;
+	} /* end while */
 
 	num_blocks = 0;
 	alarm(0);
 	if (s_flag | v_flag)  fputs(_(done_string), stderr);
 
-
-
-	/* --- ^^^ --- WIP WIP WIP --- ^^^ --- */
-
-
-
 	flush_bufs();
 	free(buffer);
 
-	if (v_flag > 1)  fprintf(stderr, "\n''test___cryptoBased_readWrite_withOUT_postZeroing'' about to return %d\n", count_of_bad_blocks_found);
+	if (v_flag > 1)
+		fprintf(stderr, "\n''test___cryptoBased_readWrite_withOUT_postZeroing'' about to return %d [count_of_bad_blocks_found].\n", count_of_bad_blocks_found);
 
 	return count_of_bad_blocks_found;
 }
