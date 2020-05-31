@@ -1198,6 +1198,27 @@ static unsigned int test___cryptoBased_readWrite_withOUT_postZeroing /* the rest
 
 		if (got == number_of_blocks_to_TRY_to_write_in_one_write) {
 			/* --- VALIDATE --- */
+
+
+
+		/* WIP TO DO: validate the sequence number _first_, reject if bad [i.e. don`t bother checksumming if bad SN] */
+
+
+
+			unsigned char* /* const? */ checksum_in_static_buffer =
+				SHA512(
+					buffer,
+					(number_of_blocks_to_TRY_to_write_in_one_write * block_size) - SHA512_DIGEST_LENGTH,
+					NULL /* as in "please use your static buffer and not one of my own choosing */
+				      );
+
+			if ( memcmp( /* _intentionally_ not the usual/idiomatic "! memcmp(...)" */
+					checksum_in_static_buffer,
+					buffer + (number_of_blocks_to_TRY_to_write_in_one_write * block_size) - SHA512_DIGEST_LENGTH,
+					SHA512_DIGEST_LENGTH
+				   )
+			) this_stride_is_bad = 1;
+
 		} else this_stride_is_bad = 1;
 
 		if (this_stride_is_bad) {
