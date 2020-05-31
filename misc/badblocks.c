@@ -1176,12 +1176,7 @@ static unsigned int test___cryptoBased_readWrite_withOUT_postZeroing /* the rest
 	/* --- vvv --- WIP WIP WIP --- vvv --- */
 
 
-/* TO DO: add here the code for testing the crypto layout that has [by "now", i.e. by this point, _already_] been laid down */
-
-
-
-
-
+	/* testing the crypto layout that has [by "now", i.e. by this point, _already_] been laid down */
 
 	if (s_flag | v_flag)  fputs(_("Reading and validating: "), stderr);
 	num_blocks = last_block;
@@ -1199,14 +1194,22 @@ static unsigned int test___cryptoBased_readWrite_withOUT_postZeroing /* the rest
 
 		got = do_read(dev, buffer, number_of_blocks_to_TRY_to_write_in_one_write, block_size, currently_testing);
 
-		if (got == 0 && number_of_blocks_to_TRY_to_write_in_one_write == 1)
-			count_of_bad_blocks_found += bb_output(currently_testing++, READ_ERROR);
+		char /* _Bool? */ this_stride_is_bad = 0;
 
-		currently_testing += got;
-		if (got != number_of_blocks_to_TRY_to_write_in_one_write) {
-			   number_of_blocks_to_TRY_to_write_in_one_write = 1;
-			continue;
-		}
+		if (got == number_of_blocks_to_TRY_to_write_in_one_write) {
+			/* --- VALIDATE --- */
+		} else this_stride_is_bad = 1;
+
+		if (this_stride_is_bad) {
+			/* WIP plan: limit = currently_testing + got;
+				     do:
+						report bad block at "currently_testing"
+						++currently_testing
+			 	     ... while currently_testing < limit
+			*/
+		} else currently_testing += got;
+
+
 		/* DELENDA EST -- copy-pasta
 		for (i=0; i < got; i++) {
 			if (memcmp(read_buffer + i * block_size,
@@ -1215,14 +1218,13 @@ static unsigned int test___cryptoBased_readWrite_withOUT_postZeroing /* the rest
 				bb_count += bb_output(currently_testing+i, CORRUPTION_ERROR);
 		}
 		*/
+
 		if (v_flag > 1)  print_status();
 	}
 
 	num_blocks = 0;
 	alarm(0);
 	if (s_flag | v_flag)  fputs(_(done_string), stderr);
-
-
 
 
 
