@@ -1179,11 +1179,59 @@ static unsigned int test___cryptoBased_readWrite_withOUT_postZeroing /* the rest
 /* TO DO: add here the code for testing the crypto layout that has [by "now", i.e. by this point, _already_] been laid down */
 
 
+
+
+
+
+	if (s_flag | v_flag)  fputs(_("Reading and validating: "), stderr);
+	num_blocks = last_block;
+	currently_testing = first_block;
+	if (s_flag && v_flag <= 1)  alarm_intr(SIGALRM);
+
+	number_of_blocks_to_TRY_to_write_in_one_write = blocks_at_once;
+	while (currently_testing < last_block) {
+		if (count_of_bad_blocks_found >= max_bb) {
+			if (s_flag || v_flag)  fputs(_("Too many bad blocks; aborting test.\n"), stderr);
+			break;
+		}
+		if (currently_testing + number_of_blocks_to_TRY_to_write_in_one_write > last_block)
+			number_of_blocks_to_TRY_to_write_in_one_write = last_block - currently_testing;
+
+		got = do_read(dev, buffer, number_of_blocks_to_TRY_to_write_in_one_write, block_size, currently_testing);
+
+		if (got == 0 && number_of_blocks_to_TRY_to_write_in_one_write == 1)
+			count_of_bad_blocks_found += bb_output(currently_testing++, READ_ERROR);
+
+		currently_testing += got;
+		if (got != number_of_blocks_to_TRY_to_write_in_one_write) {
+			   number_of_blocks_to_TRY_to_write_in_one_write = 1;
+			continue;
+		}
+		/* DELENDA EST -- copy-pasta
+		for (i=0; i < got; i++) {
+			if (memcmp(read_buffer + i * block_size,
+				   buffer + i * block_size,
+				   block_size))
+				bb_count += bb_output(currently_testing+i, CORRUPTION_ERROR);
+		}
+		*/
+		if (v_flag > 1)  print_status();
+	}
+
+	num_blocks = 0;
+	alarm(0);
+	if (s_flag | v_flag)  fputs(_(done_string), stderr);
+
+
+
+
+
 	/* --- ^^^ --- WIP WIP WIP --- ^^^ --- */
 
 
 
 	flush_bufs();
+	free(buffer);
 
 	if (v_flag > 1)  fprintf(stderr, "\n''test___cryptoBased_readWrite_withOUT_postZeroing'' about to return %d\n", count_of_bad_blocks_found);
 
@@ -1197,7 +1245,6 @@ static unsigned int test___cryptoBased_readWrite_WITH_postZeroing /* the rest of
 			 int block_size, blk_t first_block,
 			 unsigned int blocks_at_once)
 {
-	/* return bb_count; */ /* this is the intended result of this function, as per the scaffolding that calls it */
 	if (v_flag > 1)  fprintf(stderr, "\n''test___cryptoBased_readWrite_WITH_postZeroing'' was called.\n");
 	VERBOSE_DEBUG_OUTPUT_FOR_TEST_FUNCTIONS
 
@@ -1242,6 +1289,7 @@ static unsigned int test___cryptoBased_readWrite_WITH_postZeroing /* the rest of
 	} /* end while */
 
 	flush_bufs();
+	free(buffer);
 
 	if (s_flag | v_flag)  fputs(_(done_string), stderr);
 
