@@ -93,6 +93,8 @@ extern int optind;
   #define GREEN_LIGHT_FOR_CRYPTO 1
 #endif
 
+#include "../version.h"
+
 #ifndef O_LARGEFILE
 #define O_LARGEFILE 0
 #endif
@@ -126,7 +128,7 @@ static unsigned int sys_page_size = 4096;
 static void usage(void)
 {
 	fprintf(stderr, _(
-"Usage: %s [-b block_size] [-i input_file] [-o output_file] [-svwnfBX"
+"Usage: %s [-b block_size] [-i input_file] [-o output_file] [-svwnfBVX"
 #if defined(GREEN_LIGHT_FOR_CRYPTO) && GREEN_LIGHT_FOR_CRYPTO>0
 "Z0"
 #endif
@@ -1439,7 +1441,7 @@ static unsigned int parse_uint(const char *str, const char *descr)
 	return ret;
 }
 
-int main (int argc, char ** argv)
+int main(int argc, char ** argv)
 {
 	int c;
 	char * device_name;
@@ -1498,9 +1500,9 @@ int main (int argc, char ** argv)
 			    argc,
 			    argv, 
 #if defined(GREEN_LIGHT_FOR_CRYPTO) && GREEN_LIGHT_FOR_CRYPTO>0
-			    "b:d:e:fi:o:svwnc:p:h:t:BXZ0"
+			    "b:d:e:fi:o:svwnc:p:h:t:BVXZ0"
 #else
-			    "b:d:e:fi:o:svwnc:p:h:t:BX"
+			    "b:d:e:fi:o:svwnc:p:h:t:BVX"
 #endif
 			   )) != EOF) {
 		switch (c) {
@@ -1600,6 +1602,9 @@ int main (int argc, char ** argv)
 		case 'B':
 			use_buffered_io = 1;
 			break;
+		case 'V':
+			fprintf(stderr, "e2fsprogs collection version ''" E2FSPROGS_VERSION "'', date ''" E2FSPROGS_DATE "''.\n");
+			exit(0);
 		case 'X':
 			exclusive_ok++;
 			break;
