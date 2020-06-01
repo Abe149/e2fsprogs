@@ -1603,7 +1603,7 @@ int main(int argc, char ** argv)
 			use_buffered_io = 1;
 			break;
 		case 'V':
-			fprintf(stderr, "e2fsprogs collection version ''" E2FSPROGS_VERSION "'', date ''" E2FSPROGS_DATE "''.\n");
+			fprintf(stderr, "executable derived from: e2fsprogs collection with: version ''" E2FSPROGS_VERSION "'', date ''" E2FSPROGS_DATE "''.\n");
 			exit(0);
 		case 'X':
 			exclusive_ok++;
