@@ -250,6 +250,11 @@ options, as they are all mutually exclusive.
 .B \-B
 Use buffered I/O and do not use Direct I/O, even if it is available.
 .TP
+.B \-V
+Report the version and date of the e2fsprogs collection from which the executable was derived,
+and exit with status code zero (i.e. OK).
+.B No testing is performed.
+.TP
 .B \-X
 Internal flag only to be used by
 .BR e2fsck (8)
